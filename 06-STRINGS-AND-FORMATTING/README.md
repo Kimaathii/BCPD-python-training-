@@ -94,7 +94,7 @@ Exam questions frequently test distinguishing between the character classificati
 
 ---
 
-## 4. String Formatting Evolution `[Course: IMG-68/72, IMG-69, IMG-73]`
+## 4. String Formatting Evolution `[Course: IMG-68/72, IMG-69, IMG-73, D5-REV-02, D5-REV-09]`
 
 Python has supported three generations of string formatting:
 
@@ -104,20 +104,43 @@ Generation 2: str.format() (Python 2.6 / 3.0) -> Format specification mini-langu
 Generation 3: Formatted String Literals / f-strings (Python 3.6+) -> Modern, fastest, readable
 ```
 
-### Generation 1: `%` Formatting
-- `%s` (string via `str()`), `%r` (repr via `repr()`), `%d` / `%i` (integer), `%f` (float), `%x` / `%X` (hex).
-- Syntax: `"%s is %d years old" % (name, age)`
-- *Trap:* If formatting a single value, parentheses are optional unless the value is a tuple: `"%s" % (val,)`.
+### Generation 1 & 2: `old_styles.py` `[Course: D5-REV-09]`
+```python
+# ORIGINAL CLASSROOM CODE [Course: D5-REV-09]
+name, age, pi = "Ada", 36, 3.14159
+print("%s is %d" % (name, age))                 # -> Ada is 36
+print("Pi is %.2f" % pi)                        # -> Pi is 3.14
+print("[%5d]" % 42)                             # -> [   42]
+print("{} and {}".format("x", "y"))             # -> x and y
+print("{1} {0}".format("a", "b"))               # -> b a
+print("{n} scored {s}".format(n="Bo", s=9))     # -> Bo scored 9
+print("{{literal}}".format())                   # -> {literal}
+```
+- Several values go into a tuple: `"%s is %d" % (name, age)`.
+- `str.format()` uses `{}` placeholders — positional `{0}` or named `{name}`.
+- Literal braces are written by doubling: `{{` and `}}`.
 
-### Generation 2: `str.format()`
-- Positional: `"{} and {}".format(a, b)`
-- Indexed: `"{1} before {0}".format(a, b)`
-- Keyword: `"{name}: {score}".format(name="Alice", score=95)`
+### Generation 3: Modern f-strings (`fstrings.py`) `[Course: D5-REV-02, D5-REV-04]`
+```python
+# ORIGINAL CLASSROOM CODE [Course: D5-REV-02]
+name, price, x = "ada", 1234.5, 5
+print(f"Hi {name.title()}!")                    # -> Hi Ada!
+print(f"Total: {price:.2f}")                    # -> Total: 1234.50
+print(f"{price:,.1f}")                          # -> 1,234.5
+print(f"{x=}")                                  # -> x=5
+print(f"{name!r}")                              # -> 'ada'
+print(f"{x * 2 + 1}")                           # -> 11
 
-### Generation 3: f-strings
-- Prefix with `f` or `F`: `f"Hello, {name}!"`
-- Inline expressions allowed: `f"2 + 2 = {2 + 2}"`
-- Self-documenting debugging specifier (Python 3.8+): `f"{x=}"` produces `'x=42'`.
+from datetime import date
+d = date(2026, 10, 26)
+print(f"{d:%d %b %Y}")                          # -> 26 Oct 2026
+```
+- Prefix string with `f` and put any expression in braces.
+- Method calls inside braces: `f"{name.upper()}"`.
+- Format spec after colon: `f"{price:.2f}"`, `f"{price:,.1f}"`.
+- The `=` specifier (3.8+): `f"{x=}"` gives `x=5`.
+- Conversions: `!r` uses `repr()`, `!s` uses `str()`.
+- Datetime formatting specifiers work directly inside braces: `f"{d:%d %b %Y}"`.
 
 ---
 

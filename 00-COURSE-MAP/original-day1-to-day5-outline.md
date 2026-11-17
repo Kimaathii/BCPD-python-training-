@@ -1,6 +1,6 @@
-﻿# Original Instructor Curriculum (Week 1, Days 1–6)
+﻿# Original Instructor Curriculum (Week 1 & Week 2: Days 1–9)
 
-This document preserves the **exact chronological sequence taught in class** (`BCPD Cohort 2`), including Student Manual section numbers (`§1.1–§7.7`), agenda reorderings, and captured presentation slides.
+This document preserves the **exact chronological sequence taught in class** (`BCPD Cohort 2`), including Student Manual section numbers (`§1.1–§10.10`), agenda reorderings, and captured presentation slides.
 
 ---
 
@@ -121,3 +121,40 @@ This document preserves the **exact chronological sequence taught in class** (`B
 8. Slide 9 (`§7.5`): What list operations cost — Big-O complexity table (`D6-08`, `D6-09`)
 9. Slide 10 (`BEYOND THE MANUAL`): Recursion (`D6-10` / `recursion.py`)
 10. Slide 15: Knowledge check (Day 6 Quiz) (`D6-11` — 5 MCQs on comprehension odds, ASCII sort order, `*args` tuple, `nonlocal`, lambda default call)
+
+---
+
+## Day 8 — Tuples, Dictionaries & Sets *(Monday 16 Nov 2026)*
+*Sources: `D8-01` to `D8-14` | Manual: Day 8 (`§8.1–8.8`) + Day 9 (`§9.1–9.9`) | Domain 2 (Data Structures, 15%)*
+
+1. Slide 1: Title Slide — Tuples, Dictionaries & Sets (`D8-01` / `day8.py` / `Counter.most_common(1)`)
+2. Slide 2: Today's objectives & agenda (`D8-02`)
+3. Slide 3 (`§8.1–8.2`): Tuples (`D8-03` / `tuples.py` — single-item comma `(5,)`, `count()`, `index()`, mutating list inside tuple)
+4. Slide 4 (`§8.1, 8.3`): Packing, unpacking & named tuples (`D8-04` / `records.py` — packing, multiple return values, `ValueError` count mismatch, `collections.namedtuple`)
+5. Slide 5 (`§8.4–8.5`): Dictionaries: keys & lookups (`D8-07` / `dicts.py` — hashability, insertion order 3.7+, `d[k]` vs `.get()`, `in` checks keys, `{1: 'a', 1.0: 'b'}` key collision)
+6. Slide 6 (`§8.5–8.6`): Dictionary methods (`D8-05`, `D8-06` — methods table, `dict.fromkeys("ab", [])` shared list trap)
+7. Slide 7 (`§8.5–8.6`): Dictionary & tuple edge cases (`D8-08`, `D8-09` / `edge_cases.py` — `popitem()`, equality ignores order, `all({}) is True`, dict inversion, `Counter` bitwise algebra, `defaultdict`)
+8. Slide 8 (`§9.3`): collections: Counter & defaultdict (`D8-10` / `collections_demo.py` — `Counter`, `defaultdict(list)`, `OrderedDict`, `ChainMap`)
+9. Slide 9 (`§9.4`): Sets: unique & unordered (`D8-11` / `sets.py` — `{1, 2}` vs `set()`, `{}` is dict, hashable items, `remove()` vs `discard()`, `pop()`, O(1) membership)
+10. Slide 10 (`§9.5`): Set algebra (`D8-12` — union `|`, intersection `&`, difference `-`, symmetric difference `^`, subset `<=`, `isdisjoint()`, `frozenset`)
+11. Slide 11 (`§9.6–9.7`): More set operations & set traps (`D8-14` — proper subset `<`, `{1}+{2}` TypeError, `|` vs `.union()`, `all(set()) is True`, mutable element TypeError)
+12. Slide 12 (`§9.9`): Choosing the right structure (`D8-13` — decision matrix: list, tuple, dict, set, frozenset)
+13. Lab 8.1: Word frequency analysis
+
+---
+
+## Day 9 — OOP Part 1: Classes, Objects & Encapsulation *(Tuesday 17 Nov 2026)*
+*Sources: `D9-01` to `D9-11` | Manual: Day 10 (`§10.1–10.10`) | Domain 3 (Object-Oriented Programming, 15%)*
+
+1. Slide 1: Title Slide — OOP Part 1: Classes, Objects & Encapsulation (`D9-01` / `day9.py` / `Account` class)
+2. Slide 2: Today's objectives & agenda (`D9-02`, `D9-03`)
+3. Slide 3 (`§10.1`): Why object-oriented programming? (`D9-04` — Class blueprint, Object instance, Encapsulation, Roadmap to Inheritance & Polymorphism)
+4. Slide 4 (`§10.2–10.3`): Defining a class: `__init__` and self (`D9-05` / `account.py` — PascalCase, `__init__`, `self`, dynamic attributes, `type(acct).__name__`)
+5. Slide 5 (`§10.4`): Instance methods & method calls (`D9-09` / `counter.py` — `obj.method()`, forgetting `self` raises `TypeError`, returning `self` for chaining, `Class.method(obj)`)
+6. Slide 6 (`§10.5`): Class attributes vs instance attributes (`D9-08` / `dogs.py` — attribute lookup order, instance masking, **shared mutable class attribute trap** `tricks = []`)
+7. Slide 7 (`§10.6`): Dunder (magic) methods (`D9-07` / `book.py` — `__str__`, `__repr__`, `__eq__`, `__len__`)
+8. Slide 8 (`§10.7`): Encapsulation: protected & private (`D9-06` / `private.py` — `_owner` protected convention, `__balance` name mangling to `_Account__balance`, validation)
+9. Slide 9 (`§10.7`): Encapsulation: who can access what (`D9-11` — public `x`, protected `_x`, private `__x`, special `__x__` access matrix)
+10. Slide 10 (`§10.8`): @property: getters, setters & read-only (`D9-10` / `temperature.py` — `@property`, `@setter`, validation, read-only without setter raises `AttributeError`)
+11. Lab 9.1: BankAccount class
+

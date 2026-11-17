@@ -7,30 +7,29 @@
 
 ---
 
-## 1. List Fundamentals: Indexing, Slicing, and Mutability `[Course: IMG-03, IMG-53, IMG-54, IMG-61, IMG-78]`
+## 1. List Fundamentals: Indexing, Slicing, and Mutability `[Course: IMG-03, IMG-53, IMG-54, IMG-61, IMG-78, D5-REV-07]`
 
-### Creation and Heterogeneity
+### Creation and Heterogeneity (`lists.py`) `[Course: D5-REV-07]`
 A Python list is an ordered, mutable sequence of object references. Lists can store mixed data types and can grow or shrink dynamically:
-```python
-mixed = [1, "two", 3.0, [4, 5], True]
-empty = [] # or list()
-```
 
-### Indexing and Slicing
-- 0-based indexing from left (`[0]`), -1-based from right (`[-1]`).
-- Slices produce a new list (a shallow copy of the subrange):
-  ```python
-  nums = [10, 20, 30, 40, 50]
-  nums[1:4]   # [20, 30, 40]
-  nums[::-1]  # [50, 40, 30, 20, 10] (Reversed copy)
-  ```
-- **Slice Assignment (List Modification):**
-  Unlike strings, lists support item and slice assignment:
-  ```python
-  nums = [1, 2, 3, 4]
-  nums[1:3] = [20, 30, 40]  # nums is now [1, 20, 30, 40, 4]
-  nums[1:4] = []            # Deletes elements: nums is now [1, 4]
-  ```
+```python
+# ORIGINAL CLASSROOM CODE [Course: D5-REV-07]
+items = ["a", "b", "c", "d", "e"]
+print(items[1], items[-1])       # -> b e
+print(items[1:4])                # -> ['b', 'c', 'd']
+print(items[::2])                # -> ['a', 'c', 'e']
+print(items[::-1][:2])           # -> ['e', 'd']
+items[0] = "A"
+items[1:3] = ["X"]               # slice assignment
+print(items)                     # -> ['A', 'X', 'd', 'e']
+print(list("hey"), len(items))   # -> ['h', 'e', 'y'] 4
+print([1, 2] + [3], [0] * 3)     # -> [1, 2, 3] [0, 0, 0]
+```
+- Ordered and mutable; items may mix types: `[1, "two", 3.0]`.
+- `list()` converts any iterable.
+- Index from `0`; `-1` is the last item.
+- Slices return new lists; slice assignment can resize the list.
+- `in`, `len()`, `min()`, `max()`, and `sum()` all work on lists.
 
 ---
 
@@ -134,29 +133,31 @@ The instructor notes: *"Know the cost of what you call — it shows up in scenar
 
 ---
 
-## 5. Multidimensional Lists and the Reference Multiplication Trap `[Course: IMG-70, IMG-74]`
+## 5. Multidimensional Lists and the 2D Trap (`grid.py`) `[Course: IMG-70, IMG-74, D5-REV-08]`
 
 When initializing a matrix or 2D grid in Python, using `*` on a list containing another list multiplies the **references**, not the contents!
 
-### The Trap:
 ```python
-# BROKEN: All 3 rows point to the exact same list in memory!
-grid = [[0] * 3] * 3
+# ORIGINAL CLASSROOM CODE [Course: D5-REV-08]
+grid = [[1, 2, 3], [4, 5, 6]]
+print(grid[1][2])                # -> 6
+for row in grid:
+    print(sum(row), end=" ")     # -> 6 15
+print()
 
-grid[0][0] = 99
-print(grid)
-# Output: [[99, 0, 0], [99, 0, 0], [99, 0, 0]]  <-- All rows changed!
+bad = [[0] * 3] * 3              # 3 references to ONE row
+bad[0][0] = 1
+print(bad)                       # -> [[1, 0, 0], [1, 0, 0], [1, 0, 0]]
+
+good = [[0] * 3 for _ in range(3)] # 3 separate rows
+good[0][0] = 1
+print(good)                      # -> [[1, 0, 0], [0, 0, 0], [0, 0, 0]]
 ```
 
-### The Correct Idiom:
-Use a list comprehension to instantiate a brand-new list for every row:
-```python
-# CORRECT: Creates 3 distinct row objects
-grid = [[0] * 3 for _ in range(3)]
-grid[0][0] = 99
-print(grid)
-# Output: [[99, 0, 0], [0, 0, 0], [0, 0, 0]]
-```
+### Classroom Analysis Cards:
+- **Index twice:** `grid[row][col]` — the row comes first.
+- **Why `* 3` fails:** It copies the reference to one inner list, so every row is the same object.
+- **The fix:** Build each row separately with a list comprehension.
 
 ---
 

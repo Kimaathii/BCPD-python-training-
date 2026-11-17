@@ -197,3 +197,96 @@ print(compute(0))
 ['try', 'val=5', 'finally']
 ['try', 'caught_zero', 'finally']
 ```
+
+---
+
+## Drill 6: Dictionary Hash Collision & Set Algebra Tracing `[Course: D8-07, D8-08, D8-14]`
+
+### Code Snippet:
+```python
+# Part A: Key Hash Collision
+d = {1: "alpha", 1.0: "beta", True: "gamma"}
+
+# Part B: Set Operations & Discard
+s1 = {1, 2, 3}
+s2 = {3, 4}
+diff = s1 - s2
+diff.discard(99)
+
+# Part C: Dict Inversion
+m = {"x": 10, "y": 20}
+inv = dict(zip(m.values(), m))
+
+print(len(d), d[1])
+print(sorted(diff))
+print(inv[10])
+```
+
+### Trace Table:
+- **Part A:**
+  - Python checks key `1`: `hash(1) == 1`. Stores `1: "alpha"`.
+  - Next key `1.0`: `1.0 == 1` is `True` and `hash(1.0) == 1`. Same key! Overwrites value: `{1: "beta"}`.
+  - Next key `True`: `True == 1` is `True` and `hash(True) == 1`. Same key! Overwrites value: `{1: "gamma"}`.
+  - Total length of `d`: `1`. `d[1]` evaluates to `"gamma"`.
+- **Part B:**
+  - `s1 - s2 = {1, 2, 3} - {3, 4} = {1, 2}`.
+  - `diff.discard(99)`: element `99` is absent; `discard()` silently succeeds without error.
+  - `sorted(diff)`: `[1, 2]`.
+- **Part C:**
+  - `m.values()` yields `(10, 20)`. `m` yields `('x', 'y')`.
+  - `zip(m.values(), m)` pairs `(10, 'x')` and `(20, 'y')`.
+  - `dict(...)` creates `{10: 'x', 20: 'y'}`.
+  - `inv[10]` evaluates to `'x'`.
+
+### Final Output:
+```
+1 gamma
+[1, 2]
+x
+```
+
+---
+
+## Drill 7: OOP Class Lookup & Property Setter Validation `[Course: D9-08, D9-10]`
+
+### Code Snippet:
+```python
+class Widget:
+    count = 0
+    items = []
+
+    def __init__(self, name):
+        self.name = name
+        Widget.count += 1
+        self.items.append(name)
+
+w1 = Widget("A")
+w2 = Widget("B")
+w1.count = 100
+
+print(w1.count, w2.count, Widget.count)
+print(w2.items)
+```
+
+### Trace Table:
+- `Widget.count` starts at `0`. `Widget.items` starts at `[]`.
+- `w1 = Widget("A")`:
+  - `Widget.count` incremented to `1`.
+  - `self.items.append("A")` mutates the class-level list `Widget.items` -> `['A']`.
+- `w2 = Widget("B")`:
+  - `Widget.count` incremented to `2`.
+  - `self.items.append("B")` mutates `Widget.items` -> `['A', 'B']`.
+- `w1.count = 100`:
+  - Assigns `100` into instance dictionary `w1.__dict__`.
+  - `w1.count` resolves from `w1.__dict__` -> `100`.
+  - `w2.count` has no instance attribute `count`, so resolves from `Widget.count` -> `2`.
+  - `Widget.count` remains `2`.
+- `w2.items`:
+  - Resolves to shared class attribute `['A', 'B']`.
+
+### Final Output:
+```
+100 2 2
+['A', 'B']
+```
+

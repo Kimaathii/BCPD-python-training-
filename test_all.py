@@ -25,6 +25,10 @@ def run_script(file_path: Path) -> tuple[bool, str]:
     
     try:
         spec.loader.exec_module(module)
+        if hasattr(module, "main") and callable(module.main):
+            module.main()
+        elif hasattr(module, "test_exercises") and callable(module.test_exercises):
+            module.test_exercises()
         elapsed = time.time() - start_time
         return True, f"PASSED ({elapsed:.3f}s)"
     except Exception as e:
@@ -42,13 +46,15 @@ def main():
     print(f" Root Directory: {root_dir}")
     print("=" * 70)
 
-    # 1. Discover all example and solution scripts
+    # 1. Discover all example, exercise, and solution scripts
     examples = sorted(root_dir.glob("*/examples.py"))
+    exercises = sorted(root_dir.glob("*/exercises.py"))
     solutions = sorted((root_dir / "10-EXAM-PREPARATION" / "solutions").glob("*.py"))
-    test_files = examples + solutions
+    test_files = examples + exercises + solutions
 
     print(f"\nDiscovered {len(test_files)} executable suites:")
     print(f"  - {len(examples)} module example suites")
+    print(f"  - {len(exercises)} module exercise suites")
     print(f"  - {len(solutions)} exercise solution suites\n")
 
     passed = 0

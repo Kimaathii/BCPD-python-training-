@@ -1,8 +1,8 @@
-﻿# Exam Traps Question Bank (25+ Certification MCQs)
+﻿# Exam Traps Question Bank (40+ Certification MCQs)
 
 > **BCPD Python Cohort 2 Certification Preparation**  
 > **Classification:** High-Yield Trap & Edge-Case Repository  
-> **Source Grounding:** Category F Traps & Syllabus Blindspots
+> **Source Grounding:** Category F Traps & Classroom Presentation Slides (Days 1–9)
 
 ---
 
@@ -502,3 +502,193 @@ print(a)
   - `lst += [4]` invokes `list.__iadd__()`, which extends the existing list in place. The caller's `a` is modified to `[1, 4]`.
   - `lst = lst + [5]` allocates a brand-new list `[1, 4, 5]` and binds it to the local variable `lst`. The caller's variable `a` still points to `[1, 4]`.
   - Final value of `a` is `[1, 4]`.
+
+---
+
+## Part 6: Tuples, Dictionaries, Sets & OOP Traps (Days 8 & 9)
+
+### Question T-31: The Single-Element Tuple Comma Trap
+What is printed by:
+```python
+print(type((5)), type((5,)))
+```
+- A) `<class 'tuple'> <class 'tuple'>`
+- B) `<class 'int'> <class 'tuple'>`
+- C) `<class 'int'> <class 'int'>`
+- D) `SyntaxError`
+- **Correct Answer: B** `[Course: D8-03]`
+- **Analysis:** Parentheses without a comma simply perform mathematical grouping, so `(5)` evaluates to integer `5`. To define a single-element tuple, a trailing comma is strictly required: `(5,)`.
+
+---
+
+### Question T-32: Mutable Item Inside an Immutable Tuple
+What is the output of the following code?
+```python
+x = ([1], 2)
+x[0].append(5)
+print(x)
+```
+- A) `([1, 5], 2)`
+- B) `TypeError: 'tuple' object does not support item assignment`
+- C) `([1], 2)`
+- D) `([5], 2)`
+- **Correct Answer: A** `[Course: D8-03]`
+- **Analysis:** Tuples are immutable regarding their bindings (you cannot execute `x[0] = [1, 5]`), but if a referenced element is internally mutable (such as a list), mutating that list in-place succeeds!
+
+---
+
+### Question T-33: The `dict.fromkeys()` Shared Mutable Reference Trap
+What is printed by:
+```python
+d = dict.fromkeys("ab", [])
+d["a"].append(1)
+print(d)
+```
+- A) `{'a': [1], 'b': []}`
+- B) `{'a': [1], 'b': [1]}`
+- C) `{'a': [], 'b': []}`
+- D) `TypeError`
+- **Correct Answer: B** `[Course: D8-05]`
+- **Analysis:** `dict.fromkeys(iterable, default)` assigns the *exact same instance* of `default` to all keys. Mutating `d["a"]` mutates the single shared list object referenced by both `'a'` and `'b'`.
+
+---
+
+### Question T-34: Numeric Key Hash & Equality Collision
+What is the length and content of `{1: "a", 1.0: "b"}`?
+```python
+d = {1: "a", 1.0: "b"}
+print(len(d), d)
+```
+- A) `2 {1: 'a', 1.0: 'b'}`
+- B) `1 {1: 'b'}`
+- C) `1 {1.0: 'b'}`
+- D) `TypeError: duplicate key`
+- **Correct Answer: B** `[Course: D8-07]`
+- **Analysis:** In Python, `1 == 1.0` is `True` and `hash(1) == hash(1.0)`. Dictionaries identify keys by hash equality and value equality. Key `1.0` is considered identical to existing key `1`; the value is updated to `'b'` while preserving the initial key's object identity/representation `1`.
+
+---
+
+### Question T-35: Empty Set Creation Syntax
+Which expression creates an empty set?
+- A) `{}`
+- B) `set()`
+- C) `set([])`
+- D) Both B and C
+- **Correct Answer: D** `[Course: D8-11]`
+- **Analysis:** `{}` creates an empty dictionary (`dict`), NOT a set! An empty set must be instantiated via `set()` or `set([])`.
+
+---
+
+### Question T-36: Set Bitwise Operator vs Method Type Checking
+What happens when running:
+```python
+print({1, 2} | [3, 4])
+```
+- A) `{1, 2, 3, 4}`
+- B) `TypeError: unsupported operand type(s) for |: 'set' and 'list'`
+- C) `[{1, 2}, [3, 4]]`
+- D) `{1, 2, [3, 4]}`
+- **Correct Answer: B** `[Course: D8-14]`
+- **Analysis:** The bitwise set operators (`|`, `&`, `-`, `^`) strictly require `set` or `frozenset` on both sides. In contrast, the method form `{1, 2}.union([3, 4])` accepts any iterable and would return `{1, 2, 3, 4}`.
+
+---
+
+### Question T-37: Unsupported `+` Operator on Sets
+What is the result of `{1, 2} + {3}`?
+- A) `{1, 2, 3}`
+- B) `TypeError`
+- C) `None`
+- D) `[{1, 2}, 3]`
+- **Correct Answer: B** `[Course: D8-14]`
+- **Analysis:** Unlike lists, strings, and tuples, sets do not support sequence concatenation (`+`) or sequence repetition (`*`). Union is performed via `|` or `.union()`.
+
+---
+
+### Question T-38: Truthiness of Empty Collections (`all` vs `any`)
+What is printed by `print(all(set()), any(set()))`?
+- A) `True False`
+- B) `False False`
+- C) `True True`
+- D) `False True`
+- **Correct Answer: A** `[Course: D8-14]`
+- **Analysis:** `all()` returns `True` if no element of the iterable is false (vacuous truth for empty collections). `any()` returns `True` if at least one element is true (thus `False` for empty collections).
+
+---
+
+### Question T-39: Shared Mutable Class Attribute Trap
+What is printed by:
+```python
+class Dog:
+    tricks = []
+    def __init__(self, name):
+        self.name = name
+
+a, b = Dog("Rex"), Dog("Fido")
+a.tricks.append("sit")
+print(b.tricks)
+```
+- A) `[]`
+- B) `['sit']`
+- C) `AttributeError`
+- D) `None`
+- **Correct Answer: B** `[Course: D9-08]`
+- **Analysis:** `tricks = []` is declared in the class body, making it a class attribute shared across all instances of `Dog`. Modifying `a.tricks` mutates the single shared list seen by `b`.
+
+---
+
+### Question T-40: Instance Attribute Masking
+What is printed by:
+```python
+class Dog:
+    species = "Canis familiaris"
+
+a = Dog()
+a.species = "wolf"
+print(a.species, Dog.species)
+```
+- A) `wolf wolf`
+- B) `wolf Canis familiaris`
+- C) `Canis familiaris Canis familiaris`
+- D) `AttributeError`
+- **Correct Answer: B** `[Course: D9-08]`
+- **Analysis:** Assigning `a.species = "wolf"` writes an attribute into instance dictionary `a.__dict__`. It masks the class attribute for `a` but leaves `Dog.species` completely untouched.
+
+---
+
+### Question T-41: Forgetting `self` in Instance Method
+Given:
+```python
+class Worker:
+    def work():
+        return "working"
+
+w = Worker()
+w.work()
+```
+What error is raised?
+- A) `SyntaxError`
+- B) `TypeError: Worker.work() takes 0 positional arguments but 1 was given`
+- C) `NameError: 'self' is not defined`
+- D) `AttributeError`
+- **Correct Answer: B** `[Course: D9-09]`
+- **Analysis:** Calling `w.work()` passes instance `w` as the first argument automatically. Because `work()` defined zero parameters, Python raises `TypeError`.
+
+---
+
+### Question T-42: Private Attribute Name Mangling
+Given:
+```python
+class Account:
+    def __init__(self, bal):
+        self.__balance = bal
+
+acc = Account(100)
+```
+Which expression successfully reads the balance from outside the class?
+- A) `acc.__balance`
+- B) `acc._balance`
+- C) `acc._Account__balance`
+- D) Private attributes cannot be accessed under any circumstances
+- **Correct Answer: C** `[Course: D9-06, D9-11]`
+- **Analysis:** Identifiers with two leading underscores (`__x`) are name-mangled by the Python compiler to `_ClassName__x`. Direct access via `acc.__balance` raises `AttributeError`, but `acc._Account__balance` accesses the attribute directly.
+

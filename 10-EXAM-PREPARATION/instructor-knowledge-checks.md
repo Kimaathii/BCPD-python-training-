@@ -175,62 +175,55 @@
 
 ---
 
-## Day 4 Knowledge Check `[Course: IMG-73]`
+## Day 4 Knowledge Check `[Course: IMG-73, D5-REV-05]`
+
+> [!NOTE]
+> Slide 16 of the Day 4 Strings deck (`D5-REV-05`, `WhatsApp Image 2026-11-17 at 21.28.20okl.jpeg`) provides the official classroom answer key and explanations directly from the instructor.
 
 ### Question 4.1
-**What is the output of `"python"[1:4]`?**
-- A) `'pyt'`
-- B) `'yth'`
-- C) `'ytho'`
-- D) `'pyth'`
-- **Correct Answer:** **B**
-- **Explanation:** Slicing is zero-based and stop-exclusive.
-  - Index 0: `'p'`
-  - Index 1: `'y'` (included)
-  - Index 2: `'t'` (included)
-  - Index 3: `'h'` (included)
-  - Index 4: `'o'` (excluded)
-  - Result: `'yth'`.
-
-### Question 4.2
-**What does `"hello".find("z")` return?**
+**What does `"hello".find("z")` return when the character is absent?**
 - A) `False`
 - B) `None`
 - C) `-1`
 - D) Raises `ValueError`
-- **Correct Answer:** **C**
-- **Explanation:** `str.find()` returns `-1` when the substring is not found. (Contrast with `str.index()`, which raises `ValueError`).
+- **Correct Answer:** **C** `[Course: D5-REV-05]`
+- **Official Explanation:** `find()` returns `-1` when the substring is missing; `index()` would raise `ValueError`.
+
+### Question 4.2
+**What is the result of formatting `3.14159` with specifier `%.2f` or `{:.2f}`?**
+- A) `'3.14'`
+- B) `'3.1'`
+- C) `'3.141'`
+- D) `'3.15'`
+- **Correct Answer:** **A** `[Course: D5-REV-05]`
+- **Official Explanation:** `.2f` rounds to two decimal places, producing `'3.14'`.
 
 ### Question 4.3
-**What does `f"{42:05d}"` produce?**
-- A) `'42'`
-- B) `'00042'`
-- C) `'42000'`
-- D) `'   42'`
-- **Correct Answer:** **B**
-- **Explanation:** `05d` specifies formatting an integer to width 5, padded with leading zeros: `'00042'`.
+**What does `"-".join(["a", "b", "c"])` produce?**
+- A) `'-a-b-c-'`
+- B) `'-a-b-c'`
+- C) `'a-b-c-'`
+- D) `'a-b-c'`
+- **Correct Answer:** **D** `[Course: D5-REV-05]`
+- **Official Explanation:** The separator goes between items, not at the ends.
 
 ### Question 4.4
-**What is the result of `[x ** 2 for x in range(4) if x % 2 != 0]`?**
-- A) `[0, 1, 4, 9]`
-- B) `[1, 9]`
-- C) `[0, 4]`
-- D) `[1, 3]`
-- **Correct Answer:** **B**
-- **Explanation:**
-  - `range(4)` generates `0, 1, 2, 3`.
-  - Condition `x % 2 != 0` filters for odd numbers: `1, 3`.
-  - Expression `x ** 2`: `1 ** 2 = 1`, `3 ** 2 = 9`.
-  - Result: `[1, 9]`.
+**What is the output of `f"{2.345:>5.1f}|"`?**
+- A) `'2.345|'`
+- B) `'  2.3|'`
+- C) `'002.3|'`
+- D) `'2.3  |'`
+- **Correct Answer:** **B** `[Course: D5-REV-05]`
+- **Official Explanation:** Width 5 pads on the left; 1 decimal place gives `'  2.3|'`.
 
 ### Question 4.5
-**What happens when `items = [1, 2, 3]; items = items.append(4)` is executed?**
-- A) `items` becomes `[1, 2, 3, 4]`
-- B) `items` becomes `None`
-- C) Raises `AttributeError`
-- D) `items` becomes `4`
-- **Correct Answer:** **B**
-- **Explanation:** The `list.append()` method mutates the list in place and returns `None`. Re-assigning `items = items.append(4)` overwrites `items` with `None`. (The Number One Certification Trap!)
+**Which method call returns `True`?**
+- A) `"".isalpha()`
+- B) `"".isalnum()`
+- C) `"A1".isalnum()`
+- D) `"12 34".isdigit()`
+- **Correct Answer:** **C** `[Course: D5-REV-05]`
+- **Official Explanation:** `"A1"` is all letters and digits; the `is...` methods return `False` for the empty string `""` and spaces.
 
 ---
 
@@ -343,3 +336,108 @@
 - D) `12`
 - **Correct Answer:** **D**
 - **Explanation:** The anonymous lambda takes `x` positionally and `y` defaulting to `3`. Calling it with `4` sets `x=4`, `y=3`. The expression `x * y = 4 * 3 = 12` is returned and printed.
+
+---
+
+## Day 8 Knowledge Check: Tuples, Dictionaries & Sets `[Course: D8-01 to D8-14]`
+
+### Question 8.1
+**What is the output of `print(type((5)), type((5,)))`?**
+- A) `<class 'tuple'> <class 'tuple'>`
+- B) `<class 'int'> <class 'tuple'>`
+- C) `<class 'int'> <class 'int'>`
+- D) `TypeError`
+- **Correct Answer:** **B** `[Course: D8-03]`
+- **Explanation:** In Python, parentheses around a single expression without a comma are evaluated as mathematical grouping. Therefore, `(5)` is an integer. A trailing comma is required to form a single-element tuple: `(5,)`.
+
+### Question 8.2
+**What is the result of evaluating `len({1: "a", 1.0: "b"})`?**
+- A) `2`
+- B) `1`
+- C) `0`
+- D) Raises `KeyError`
+- **Correct Answer:** **B** `[Course: D8-07]`
+- **Explanation:** In Python, integer `1` and float `1.0` compare as equal (`1 == 1.0` is `True`) and yield identical hash values (`hash(1) == hash(1.0)`). Dictionaries key off hash and value equality, so key `1.0` overwrites key `1` in-place, leaving a dictionary of length `1`: `{1: 'b'}`.
+
+### Question 8.3
+**Given `d = dict.fromkeys("ab", [])` followed by `d["a"].append(1)`, what is `d["b"]`?**
+- A) `[]`
+- B) `[1]`
+- C) `None`
+- D) Raises `KeyError`
+- **Correct Answer:** **B** `[Course: D8-05]`
+- **Explanation:** `dict.fromkeys(keys, default)` associates the *exact same default object reference* with every key. Appending `1` to `d["a"]` mutates the single shared list instance, which is also accessed via `d["b"]`.
+
+### Question 8.4
+**Which statement regarding set operators versus set methods is TRUE?**
+- A) Bitwise operators like `|` and `&` accept any iterable on the right-hand side.
+- B) Set methods like `.union()` and `.intersection()` accept any iterable argument.
+- C) `{1, 2} | [3, 4]` returns `{1, 2, 3, 4}`.
+- D) `{1, 2} + {3, 4}` creates a combined set.
+- **Correct Answer:** **B** `[Course: D8-14]`
+- **Explanation:** Set methods (such as `s.union([3, 4])`) accept any iterable. In contrast, bitwise set operators (`|`, `&`, `-`, `^`) require both operands to be sets, otherwise raising `TypeError`. Sets do not support `+`.
+
+### Question 8.5
+**Given `c1 = Counter("aab")` and `c2 = Counter("abb")`, what is `c1 | c2`?**
+- A) `Counter({'a': 3, 'b': 3})`
+- B) `Counter({'a': 1, 'b': 1})`
+- C) `Counter({'a': 2, 'b': 2})`
+- D) `Counter({'a': 0, 'b': 0})`
+- **Correct Answer:** **C** `[Course: D8-08]`
+- **Explanation:** The union operator `|` on `Counter` objects computes the multiset union, which takes the **maximum** count for each key: `max(2, 1) = 2` for `'a'`, and `max(1, 2) = 2` for `'b'`, resulting in `Counter({'a': 2, 'b': 2})`. (Intersection `&` takes the minimum).
+
+---
+
+## Day 9 Knowledge Check: OOP Classes & Encapsulation `[Course: D9-01 to D9-11]`
+
+### Question 9.1
+**What happens when `a.species = "wolf"` is executed on an instance `a` of class `Dog` where `Dog.species = "Canis familiaris"`?**
+- A) `Dog.species` is changed to `"wolf"` for all dogs.
+- B) An instance attribute `species` is created on `a`; `Dog.species` remains `"Canis familiaris"`.
+- C) Raises `AttributeError: read-only attribute`.
+- D) Raises `TypeError`.
+- **Correct Answer:** **B** `[Course: D9-08]`
+- **Explanation:** Attribute assignment through an instance (`a.attr = val`) writes directly to that instance's namespace (`a.__dict__`). It shadows the class attribute for instance `a` while leaving the class-level attribute `Dog.species` unchanged.
+
+### Question 9.2
+**Given class `class Clicker: def ping(): return 1`, what occurs when calling `c = Clicker(); c.ping()`?**
+- A) Returns `1`.
+- B) Raises `TypeError: Clicker.ping() takes 0 positional arguments but 1 was given`.
+- C) Raises `NameError: ping is not defined`.
+- D) Raises `AttributeError`.
+- **Correct Answer:** **B** `[Course: D9-09]`
+- **Explanation:** Calling `c.ping()` passes instance `c` as the first argument automatically. Because `ping` was defined without the `self` parameter, Python raises `TypeError`.
+
+### Question 9.3
+**In the class below, why do all instances share the same `tricks` list?**
+```python
+class Dog:
+    tricks = []
+    def __init__(self, name):
+        self.name = name
+```
+- A) Because Python lists are always global.
+- B) Because `tricks` is declared at the class level, making it a shared class attribute across all instances.
+- C) Because `name` was not passed to `tricks`.
+- D) It does not share; each instance gets an independent copy.
+- **Correct Answer:** **B** `[Course: D9-08]`
+- **Explanation:** Any mutable object declared in the class body belongs to the class namespace and is shared among all instances. To give each object its own list, it must be initialized on `self` inside `__init__`: `self.tricks = []`.
+
+### Question 9.4
+**Which dunder method provides an unambiguous, developer-facing representation of an object (typically used in the REPL)?**
+- A) `__str__`
+- B) `__len__`
+- C) `__repr__`
+- D) `__name__`
+- **Correct Answer:** **C** `[Course: D9-07]`
+- **Explanation:** `__repr__` is intended for developers and debugging (unambiguous, ideally executable code). `__str__` is intended for readable user-facing output (`print()`).
+
+### Question 9.5
+**In Python, how is an attribute defined as `self.__balance` internally stored by the compiler to prevent accidental overrides?**
+- A) It is stored in a hidden hardware register.
+- B) It is name-mangled to `_ClassName__balance`.
+- C) It is encrypted with AES-256 in memory.
+- D) It is discarded when `__init__` completes.
+- **Correct Answer:** **B** `[Course: D9-06, D9-11]`
+- **Explanation:** Any identifier with two or more leading underscores (and at most one trailing underscore) undergoes private name mangling, being rewritten internally as `_ClassName__attributeName`.
+
