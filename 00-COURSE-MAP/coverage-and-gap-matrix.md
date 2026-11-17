@@ -1,50 +1,62 @@
-﻿# Coverage & Gap Analysis Matrix (Categories Aâ€“F)
+﻿# Coverage & Gap Analysis Matrix (Categories A–F)
 
-> **Distinction Rule:** Items marked **[Course Slide]** are verified in the 79 screenshots. Items marked **[Supplementary]** are recommended additions to resolve conceptual gaps or uncaptured syllabus items; we do **not** claim to know exact official BCPD exam questions beyond what appears in your slides (`IMG-56`, `IMG-26`, `IMG-29`, `IMG-30`, `IMG-47`, `IMG-51`, `IMG-63`, `IMG-65`, and Sanfoundry sets in `IMG-31`, `IMG-49`).
-
----
-
-## Category A â€” Covered Adequately `[Course Slide]`
-
-| Topic | Source Screenshots | Target Module |
-|---|---|---|
-| Installing Python, REPL vs Script, `print`/`input`, `venv`/`pip` | `IMG-19`, `IMG-21`â€“`IMG-25` | `01-FOUNDATIONS-AND-ENV` |
-| Arithmetic (`/`, `//`, `%`), `divmod`, `pow`, Precedence, Bitwise & Flags | `IMG-07`â€“`IMG-11`, `IMG-13`â€“`IMG-17` | `03-OPERATORS-AND-BITWISE` |
-| Comparisons (`==` vs `is`), `if`/`elif`/`else`, Ternary, Short-circuit, `match-case` | `IMG-32`, `IMG-36`â€“`IMG-38` | `04-CONDITIONALS-AND-LOGIC` |
-| `while`/`for`, `range`/`enumerate`/`zip`, `break`/`continue`/`pass`/`else`, Classic Programs, Traps | `IMG-39`â€“`IMG-46` | `05-LOOPS-AND-ITERATION` |
-| String Methods, `split`/`join`, `%` / `str.format()` / f-strings / Format-Spec | `IMG-01`, `IMG-02`, `IMG-04`, `IMG-05`, `IMG-57`â€“`IMG-60`, `IMG-64`, `IMG-68`â€“`IMG-73`, `IMG-76` | `06-STRINGS-AND-FORMATTING` |
-| List Slicing, Methods, 2D Trap, Unpacking/`deque`, Shallow vs Deep Copy | `IMG-61`, `IMG-67`, `IMG-71`, `IMG-74`, `IMG-78`, `IMG-79` | `07-LISTS-STRUCTURES-AND-COMPREHENSIONS` |
+> **Distinction Rule:** Items marked **[Course Slide]** are directly verified in the presentation decks:
+> - Initial 79 screenshots (`IMG-01`–`IMG-79`)
+> - Day 5 & Day 6 presentation deck (`D5-01`–`D6-11`)
+> - Week 2 Day 8 & Day 9 presentation deck (`D8-01`–`D9-11`, `D5-REV-01`–`D5-REV-09`)
+> 
+> Items marked **[Supplementary]** are recommended additions to provide architectural depth and resolve syllabus blindspots.
 
 ---
 
-## Category B â€” Covered but Poorly Explained `[Course Slide + Supplementary Depth]`
+## Category A — Covered Adequately `[Course Slide]`
 
-| Topic | What's Missing in Slides | Why It Matters | Target Module |
-|---|---|---|---|
-| CPython execution pipeline (`IMG-56`) | Brief notes only + `.py` vs `.pyc` typo | Explains parse-time (`SyntaxError`) vs runtime (`ValueError`) failures | `01` |
-| IEEE 754 floats & `round()` (`IMG-09, 11, 12`) | Why `0.1 + 0.2 != 0.3` and `round(2.675, 2) == 2.67` | Prevents memorization mistakes on float output MCQs | `02` |
-| Two's complement `~x` (`IMG-13`) | Formula `-x - 1` stated without arbitrary-precision sign-bit reason | Beginners wrongly expect `~0b1100` -> `0b0011` (`3`) | `03` |
-| Iterator protocol & generator exhaustion (`IMG-54, 55`) | `sum(gen), sum(gen) -> 91 0` without `__iter__`/`__next__` model | Crucial for predicting single-pass iterator exhaustion | `05`, `07` |
-| Object-reference model & interning (`IMG-32, 64, 79`) | `is` vs `==` and aliasing shown separately without unified memory model | Connects `a = a.sort()`, `shallow` copy, and `is` traps | `02`, `07`, `09` |
-| Time complexity / Big-O (`IMG-42, 43, 67`) | Labels (`O(n)`, `O(n^2)`, `pop(0) is O(n)`) without array-shift reasoning | Needed to justify `deque.popleft()` and prime `sqrt(n)` loop bound | `05`, `07` |
-
----
-
-## Category C â€” Mentioned but Not Developed
-
-- **Variables & Core Types (`Â§2.1â€“2.5`):** Mentioned in `IMG-30` Q1 & `IMG-31`; slides missing -> *include in `02`*.
-- **`match-case` Bare-Name Capture Trap (`IMG-38`):** Only positive examples shown -> *include in `04`*.
-- **`filter(bool, items)` (`IMG-44`):** Used without explaining lazy filter objects -> *include in `05`*.
-- **Dictionaries & Sets (`IMG-54, 66`):** Used in comprehensions & `dict.get()` without foundational slides -> *include primer in `07`*.
-- **`try/except` & Imports (`IMG-02, 11, 22, 45, 67, 76, 79`):** Previewed without lessons -> *bridge in `09`*.
-- **Day 5 Function Topics (`IMG-75`):** 6 `extra` topics + Lab 5.1 listed on agenda, 0 slides captured -> *build `[Agenda-Mapped / Supplementary]` in `08`*.
+| Topic | Source Screenshots | Target Module | Status |
+|---|---|---|:---:|
+| Installing Python, REPL vs Script, `print`/`input`, `venv`/`pip` | `IMG-19`, `IMG-21`–`IMG-25` | `01-FOUNDATIONS-AND-ENV` | **100% Complete** |
+| Arithmetic (`/`, `//`, `%`), `divmod`, `pow`, Precedence, Bitwise & Flags | `IMG-07`–`IMG-11`, `IMG-13`–`IMG-17` | `03-OPERATORS-AND-BITWISE` | **100% Complete** |
+| Comparisons (`==` vs `is`), `if`/`elif`/`else`, Ternary, Short-circuit, `match-case` | `IMG-32`, `IMG-36`–`IMG-38` | `04-CONDITIONALS-AND-LOGIC` | **100% Complete** |
+| `while`/`for`, `range`/`enumerate`/`zip`, `break`/`continue`/`pass`/`else`, Classic Programs, Traps | `IMG-39`–`IMG-46` | `05-LOOPS-AND-ITERATION` | **100% Complete** |
+| String Methods, `split`/`join`, `%` / `str.format()` / f-strings / Format-Spec | `IMG-01, 02, 04, 05, 57–60, 64, 68–73, 76` + `D5-REV-02, 05, 09` | `06-STRINGS-AND-FORMATTING` | **100% Complete** |
+| List Slicing, Methods, 2D Trap, Unpacking/`deque`, Sorting, Comprehensions, Big-O | `IMG-61, 67, 71, 74, 78, 79` + `D6-01`–`D6-09` + `D5-REV-01, 07, 08` | `07-LISTS-STRUCTURES-AND-COMPREHENSIONS` | **100% Complete** |
+| Functions, Mutable Default Trap, `*args`/`**kwargs`, LEGB Scope, `nonlocal`, `map`/`filter`/`reduce`, Recursion | `D5-01`–`D5-04` + `D6-06, 07, 10` | `08-FUNCTIONS-AND-SCOPE` | **100% Complete** |
+| Tuples, `namedtuple`, Dictionaries, Hashability, Collision Trap, `Counter`/`defaultdict`, Sets, Set Algebra | `D8-01`–`D8-14` | `11-TUPLES-DICTS-AND-SETS` | **100% Complete** |
+| Classes, `__init__`, `self`, Method Chaining, Class vs Instance Attributes, Shared Mutable Trap, Dunders, Encapsulation & Mangling, `@property` | `D9-01`–`D9-11` | `12-OOP-CLASSES-AND-ENCAPSULATION` | **100% Complete** |
 
 ---
 
-## Category D & E â€” Not Covered: Foundational & Exam-Relevant `[Recommended Supplementary]`
+## Category B — Covered but Strengthened with Supplemental Depth `[Course Slide + Supplementary Depth]`
 
-- **D (Foundational):** Name-binding vs object mutation; `None` type & implicit `None` returns; `Sequence` vs `Iterable` vs `Mapping`; `tuple` basics including 1-element trailing comma `(5,)`.
-- **E (Potentially Exam-Relevant):** Dictionaries/Sets operations & hashability; Functions/Scope (`08`); Exception hierarchy & `try/except/else/finally/raise` (`09` preview, pending Week 2â€“3 screenshots for File I/O, Modules, OOP).
+| Topic | Classroom Coverage | Hardening Added | Target Module |
+|---|---|---|:---:|
+| CPython execution pipeline (`IMG-56`) | Brief notes + `.py` vs `.pyc` | Parse-time (`SyntaxError`) vs runtime (`ValueError`) failure timeline | `01` |
+| IEEE 754 floats & `round()` (`IMG-09, 11, 12`) | Formulas shown without rounding parity | Banker's Rounding (Round-Half-To-Even) and `math.isclose()` | `02` |
+| Two's complement `~x` (`IMG-13`) | Formula `~x = -x - 1` without arbitrary precision reason | Infinite sign-bit extension model | `03` |
+| Iterator protocol & generator exhaustion (`IMG-54, 55`) | Traversal shown without `__iter__`/`__next__` | Single-pass exhaustion and `itertools` | `05`, `07` |
+| Object-reference model & interning (`IMG-32, 64, 79`) | `is` vs `==` shown in isolation | Unified pointer model across ints, strings, lists, tuples | `02`, `07`, `09` |
+| Time complexity / Big-O (`IMG-42, 43, 67`, `D6-08`) | Big-O table from class | Underlying contiguous array reallocation & pointer shifting logic | `05`, `07` |
+| Function parameter ordering (`D5-03`) | `*args` and `**kwargs` shown | Strict order: positional, `*args`, keyword-only, `**kwargs` | `08` |
+| Hashability & collisions (`D8-07`) | `{1: 'a', 1.0: 'b'}` collision | Underlying `hash()` equality and `__eq__()` dual requirement | `11` |
+| Name mangling mechanics (`D9-06, D9-11`) | `_Account__balance` shown | Subclass namespace protection vs security misconception | `12` |
+
+---
+
+## Category C — Previously Missing Topics Now Fully Resolved by New Slides
+
+- **Functions & Variable Scope:** Resolved by Day 5 & Day 6 slides (`D5-01`–`D5-04`, `D6-06`, `D6-07`, `D6-10`) -> Integrated into Module `08`.
+- **List Methods Table & 2D Grid Trap:** Resolved by review slides (`D5-REV-01`, `D5-REV-07`, `D5-REV-08`) -> Integrated into Module `07`.
+- **String Formatting Answers & Explanations:** Resolved by slide 16 (`D5-REV-05`) -> Integrated into Module `06` and `10-EXAM-PREPARATION`.
+- **Tuples, Namedtuples, Dictionaries, Sets:** Resolved by Day 8 slides (`D8-01`–`D8-14`) -> Integrated into Module `11`.
+- **OOP Classes, Instances, Attributes, Dunders, Encapsulation, Properties:** Resolved by Day 9 slides (`D9-01`–`D9-11`) -> Integrated into Module `12`.
+
+---
+
+## Category D & E — Remaining Advanced Bridges (Days 10–14 Preview)
+
+- **File I/O & Context Managers (`with open(...)`):** Standard library file operations (Week 2 Day 10+).
+- **Advanced Inheritance & Polymorphism (`super()`, MRO):** Explicitly previewed on Day 9 slide `D9-04` ("Coming next: Inheritance and polymorphism (Days 10–11)").
+- **Advanced Decorators & Closures:** Previewed on Day 9 slide `D9-10` ("@property is a decorator — Day 11 shows how decorators work").
+- **Package Architecture & `__init__.py`:** Multi-file packaging and distribution.
 
 ---
 

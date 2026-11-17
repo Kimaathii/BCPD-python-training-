@@ -87,3 +87,41 @@
 - [ ] Explain the `if __name__ == "__main__":` idiom.
 - [ ] Write full exception handling suites: `try`, `except`, `else`, `finally`. `[IMG-22, IMG-45]`
 - [ ] Know that `finally` runs even when `try` or `except` executes a `return`.
+
+---
+
+## 10. Tuples, Dictionaries & Sets `[Module 11]`
+- [ ] Understand tuple immutability and know that a single-item tuple requires a comma: `(5,)`. `[D8-03]`
+- [ ] Explain mutability inside immutability: mutating a list nested inside a tuple `([1], 2)`. `[D8-03]`
+- [ ] Define and use `collections.namedtuple` for lightweight, readable immutable records. `[D8-04]`
+- [ ] Understand multiple return values as implicit tuples and avoid unpacking count mismatches. `[D8-04]`
+- [ ] State dictionary key requirements: keys must be **hashable** (immutable: `str`, `int`, `float`, `tuple`, `frozenset`). `[D8-07]`
+- [ ] Predict the `{1: 'a', 1.0: 'b'}` numeric key collision: equal values and hashes overwrite the key in-place. `[D8-07]`
+- [ ] Identify the `dict.fromkeys("ab", [])` shared mutable list trap. `[D8-05]`
+- [ ] Use dictionary methods: `get()`, `pop()`, `popitem()` (LIFO), `update()`, and `setdefault()`. `[D8-05]`
+- [ ] Know that dictionary equality ignores key ordering: `{"a": 1, "b": 2} == {"b": 2, "a": 1}` is `True`. `[D8-08]`
+- [ ] Perform multiset operations with `collections.Counter`: `|` takes maximum count, `&` takes minimum count. `[D8-08, D8-10]`
+- [ ] Use `collections.defaultdict` with factory callables (`int`, `list`, `set`) to handle missing keys. `[D8-10]`
+- [ ] Remember that `{}` creates an empty dictionary, while `set()` creates an empty set. `[D8-11]`
+- [ ] Distinguish `remove()` (raises `KeyError` if absent) from `discard()` (silent no-op). `[D8-11]`
+- [ ] Perform set algebra: Union `|`, Intersection `&`, Difference `-`, Symmetric Difference `^`, Subsets `<` and `<=`. `[D8-12]`
+- [ ] Recall that set operators require sets on both sides, while set methods accept any iterable. `[D8-14]`
+- [ ] Know that sets do not support `+` or `*`, and that `all(set())` evaluates to `True`. `[D8-14]`
+- [ ] Explain `frozenset` as an immutable, hashable set suitable for dictionary keys or set members. `[D8-12, D8-13]`
+
+---
+
+## 11. Object-Oriented Programming & Encapsulation `[Module 12]`
+- [ ] Differentiate between Class (blueprint) and Object (instance). `[D9-04]`
+- [ ] Write PascalCase class definitions with `__init__` constructors. `[D9-05]`
+- [ ] Understand the explicit `self` parameter and how `obj.method()` translates to `Class.method(obj)`. `[D9-05, D9-09]`
+- [ ] Recognize that omitting `self` in an instance method signature raises `TypeError` when called on an instance. `[D9-09]`
+- [ ] Implement method chaining by returning `self` from mutator methods. `[D9-09]`
+- [ ] Trace attribute lookup order: instance dictionary `obj.__dict__` first, then class dictionary `type(obj).__dict__`. `[D9-08]`
+- [ ] Explain instance attribute masking: `a.species = "wolf"` creates an instance attribute without touching `Dog.species`. `[D9-08]`
+- [ ] Identify and resolve the **shared mutable class attribute trap** (`tricks = []` declared in class body). `[D9-08]`
+- [ ] Implement core dunder methods: `__str__` (readable/user), `__repr__` (unambiguous/developer), `__eq__` (value equality), `__len__`. `[D9-07]`
+- [ ] Distinguish protected attributes (`_x` convention) from private name-mangled attributes (`__x` becomes `_ClassName__x`). `[D9-06, D9-11]`
+- [ ] Know that `__balance` raises `AttributeError` on direct external access, but `_Account__balance` accesses the attribute. `[D9-06, D9-11]`
+- [ ] Use `@property` to create getter methods, `@<name>.setter` for data validation, and recognize read-only property `AttributeError` on write. `[D9-10]`
+

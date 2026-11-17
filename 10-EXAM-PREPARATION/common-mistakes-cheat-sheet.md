@@ -48,4 +48,33 @@
 | **T15** | 2D matrix multiplication:<br>`grid = [[0] * 3] * 3` | Duplicates pointers to the same inner list; modifying `grid[0][0]` changes all rows. | `grid = [[0] * 3 for _ in range(3)]` | `IMG-70, IMG-74` |
 | **T16** | Re-iterating a consumed generator:<br>`g = (x for x in r); sum(g); sum(g)` | Generators evaluate lazily and exhaust on first traversal; second run yields 0. | Convert to `list` first if multiple traversals are needed: `data = list(g)`. | `IMG-78, IMG-79` |
 | **T17** | Modifying a list during iteration:<br>`for x in lst: lst.remove(x)` | Deleting elements shifts remaining indices left, causing subsequent elements to be skipped. | Iterate over a copy: `for x in lst[:]:` or use a list comprehension. | `IMG-46, IMG-70` |
-| **T18** | Mutable default parameter:<br>`def f(x, acc=[]): acc.append(x)` | Default object is instantiated once at function definition and shared across all calls. | `def f(x, acc=None): if acc is None: acc = []` | `IMG-75` |
+| **T18** | Mutable default parameter:<br>`def f(x, acc=[]): acc.append(x)` | Default object is instantiated once at function definition and shared across all calls. | `def f(x, acc=None): if acc is None: acc = []` | `IMG-75, D5-02` |
+
+---
+
+## 5. Tuples, Dictionaries & Sets Traps (Day 8)
+
+| # | Trap / Anti-Pattern | Why It Breaks | Do This Instead | Course Citation |
+|---|---|---|---|---|
+| **T19** | Single-item tuple comma omission:<br>`t = (5)` | Parentheses without a trailing comma evaluate as integer grouping: `type((5)) is int`. | Add trailing comma: `t = (5,)` or `t = 5,`. | `D8-03` |
+| **T20** | Attempting to mutate tuple elements:<br>`t = (1, 2); t[0] = 9` | Tuples are immutable and do not support item assignment. | Convert to list first: `l = list(t); l[0] = 9; t = tuple(l)`. | `D8-03` |
+| **T21** | Mutating list nested inside tuple:<br>`t = ([1], 2); t[0].append(5)` | The tuple binding is immutable, but the nested list object is mutable and modified in place! | Use nested tuples if complete immutability is required: `t = ((1,), 2)`. | `D8-03` |
+| **T22** | `dict.fromkeys("ab", [])` list trap | The same single list object is shared across all keys; mutating one key alters all! | Use dict comprehension: `{k: [] for k in "ab"}`. | `D8-05` |
+| **T23** | Numeric key collision in dicts:<br>`d = {1: "a", 1.0: "b"}` | `1 == 1.0` is `True` and `hash(1) == hash(1.0)`; key `1.0` overwrites key `1` in place! | Keep key types strictly distinct if numerical differentiation is required. | `D8-07` |
+| **T24** | Creating an empty set with `{}` | `{}` creates an empty dictionary (`dict`), NOT a set. | Use `set()` to instantiate an empty set. | `D8-11` |
+| **T25** | Set bitwise operators on non-sets:<br>`s = {1, 2} \| [3, 4]` | Bitwise set operators (`\|`, `&`, `-`, `^`) require sets on both sides and raise `TypeError`. | Use method syntax: `s.union([3, 4])` (accepts any iterable). | `D8-14` |
+| **T26** | Attempting set concatenation:<br>`s = {1, 2} + {3}` | Sets do not support sequence concatenation (`+`) or repetition (`*`); raises `TypeError`. | Use `s \| {3}` or `s.add(3)`. | `D8-14` |
+| **T27** | Expecting empty `all()` to be False:<br>`all(set())` | Vacuous truth: `all()` returns `True` if no element is falsy, so `all(set()) is True`. | Check non-emptiness explicitly: `bool(s) and all(s)`. | `D8-14` |
+
+---
+
+## 6. Object-Oriented Programming Traps (Day 9)
+
+| # | Trap / Anti-Pattern | Why It Breaks | Do This Instead | Course Citation |
+|---|---|---|---|---|
+| **T28** | Shared mutable class attribute:<br>`class Dog: tricks = []` | Attributes declared in class body are shared across all instances; mutating in one modifies all. | Initialize mutable attributes inside `__init__`: `self.tricks = []`. | `D9-08` |
+| **T29** | Forgetting `self` in method definition:<br>`def click(): pass` | Calling `obj.click()` passes `self` automatically, raising `TypeError: takes 0 args but 1 given`. | Always write `def click(self, ...):`. | `D9-09` |
+| **T30** | Direct private attribute access:<br>`print(obj.__balance)` | Double leading underscore name-mangles attribute to `_ClassName__balance`; raises `AttributeError`. | Provide a public getter via `@property` or access via `obj._ClassName__balance`. | `D9-06, D9-11` |
+| **T31** | Assigning to a read-only property:<br>`t.fahrenheit = 100` | A `@property` without a corresponding `@<name>.setter` raises `AttributeError: can't set attribute`. | Define a `@fahrenheit.setter` method or set the underlying state (`celsius`). | `D9-10` |
+| **T32** | Expecting instance assignment to update class:<br>`a = Dog(); a.species = "wolf"` | Instance assignment creates a local attribute in `a.__dict__`, masking but not touching `Dog.species`. | Mutate class directly if global change is intended: `Dog.species = "wolf"`. | `D9-08` |
+

@@ -239,3 +239,86 @@ print(increment())
 - D) `UnboundLocalError`
 - **Correct Answer:** **A**
 - **Explanation:** Default parameter expressions are evaluated at **function definition time**. At the moment `def increment(...)` was compiled, `count` was `0`. Later mutating or rebinding `count = 10` does not change the default value bound to `step`.
+
+---
+
+## Set 6: Tuples, Dictionaries & Sets (Assigned in Day 8) `[Course: D8-01 to D8-14]`
+
+### Q6.1: Mutating Mutable Object Inside Tuple
+What is printed by:
+```python
+t = (1, [2, 3])
+t[1].append(4)
+print(t)
+```
+- A) `(1, [2, 3])`
+- B) `(1, [2, 3, 4])`
+- C) `TypeError`
+- D) `(1, 4)`
+- **Correct Answer:** **B** `[Course: D8-03]`
+- **Explanation:** Tuples are immutable in terms of their stored references, but the object referenced at index 1 is a mutable list. Mutating the list in place via `append` succeeds.
+
+### Q6.2: Dictionary Hashability & Numeric Collisions
+What is the output of:
+```python
+d = {}
+d[1] = "apple"
+d[1.0] = "banana"
+d[True] = "cherry"
+print(len(d), d[1])
+```
+- A) `3 cherry`
+- B) `1 cherry`
+- C) `1 apple`
+- D) `2 banana`
+- **Correct Answer:** **B** `[Course: D8-07]`
+- **Explanation:** In Python, `1 == 1.0 == True` and `hash(1) == hash(1.0) == hash(True)`. All three keys map to the exact same hash slot and compare equal. Each successive assignment overwrites the value in place, leaving 1 key with value `"cherry"`.
+
+### Q6.3: Set Bitwise Operators vs Method Syntax
+Which statement raises a `TypeError`?
+- A) `{1, 2}.union([3, 4])`
+- B) `{1, 2}.intersection([2, 3])`
+- C) `{1, 2} | [3, 4]`
+- D) `{1, 2} & {2, 3}`
+- **Correct Answer:** **C** `[Course: D8-14]`
+- **Explanation:** Bitwise operators (`|`, `&`, `-`, `^`) require `set` or `frozenset` on both sides. Passing a list raises `TypeError`. In contrast, methods like `.union()` accept any iterable.
+
+---
+
+## Set 7: Object-Oriented Programming & Encapsulation (Assigned in Day 9) `[Course: D9-01 to D9-11]`
+
+### Q7.1: Instance Attribute Lookup Shadowing
+What is the output of:
+```python
+class Counter:
+    val = 0
+
+c1 = Counter()
+c2 = Counter()
+c1.val += 5
+print(c1.val, c2.val, Counter.val)
+```
+- A) `5 5 5`
+- B) `5 0 0`
+- C) `5 5 0`
+- D) `0 0 0`
+- **Correct Answer:** **B** `[Course: D9-08]`
+- **Explanation:** `c1.val += 5` expands to `c1.val = c1.val + 5`. Reading `c1.val` reads the class attribute `0`. Adding `5` produces `5`. Assigning `c1.val = 5` binds `val = 5` into `c1`'s instance dictionary `c1.__dict__`. It leaves `Counter.val` and `c2.val` untouched at `0`.
+
+### Q7.2: Private Attribute Name Mangling
+Given:
+```python
+class Secret:
+    def __init__(self, key):
+        self.__key = key
+
+s = Secret("xyz")
+```
+Which expression successfully accesses the stored key?
+- A) `s.__key`
+- B) `s._key`
+- C) `s._Secret__key`
+- D) `getattr(s, "key")`
+- **Correct Answer:** **C** `[Course: D9-06, D9-11]`
+- **Explanation:** Python's compiler mangles double-underscore private attributes to `_ClassName__attributeName`. Accessing `s._Secret__key` succeeds; direct `s.__key` raises `AttributeError`.
+

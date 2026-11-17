@@ -1,6 +1,6 @@
 ﻿# Topic Dependency Map & Reordering Rationale
 
-The original classroom decks split related topics across days and occasionally previewed syntax before its prerequisites were taught. This map defines the **clean study order** used across modules `01`â€“`09`.
+The original classroom decks split related topics across days and occasionally previewed syntax before its prerequisites were taught. This map defines the **clean study order** used across modules `01`–`12`.
 
 ---
 
@@ -8,29 +8,38 @@ The original classroom decks split related topics across days and occasionally p
 
 ```text
 [01: Foundations & Runtime]
-  â”‚  (CPython pipeline, syntax/indentation, venv/pip, print/input)
-  â–¼
+  │  (CPython pipeline, syntax/indentation, venv/pip, print/input)
+  ▼
 [02: Types, Variables & Truthiness]
-  â”‚  (Naming rules, int/float/complex/bool/None, conversions, == vs is)
-  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-  â–¼                                              â–¼
+  │  (Naming rules, int/float/complex/bool/None, conversions, == vs is)
+  ├─────────────────────────────────────────────┐
+  ▼                                              ▼
 [03: Operators & Bitwise]              [06: Strings & Formatting]
-  â”‚  (/, //, %, precedence, :=, &, |, ^, ~)       â–²  (Literals, slicing, methods, formatting)
-  â–¼                                              â”‚
-[04: Conditionals & Logic]                       â”‚
-  â”‚  (if/elif/else, ternary, and/or, match-case) â”‚
-  â–¼                                              â”‚
-[05: Loops & Iteration] â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-  â”‚  (while, for, range, iter/next, break/else, Big-O)
-  â–¼
+  │  (/, //, %, precedence, :=, &, |, ^, ~)       ▲  (Literals, slicing, methods, formatting)
+  ▼                                              │
+[04: Conditionals & Logic]                       │
+  │  (if/elif/else, ternary, and/or, match-case) │
+  ▼                                              │
+[05: Loops & Iteration] ─────────────────────────┘
+  │  (while, for, range, iter/next, break/else, Big-O)
+  ▼
 [07: Lists, Structures & Comprehensions]
-  â”‚  (Lists, 2D trap, unpacking/deque, shallow/deep copy, comprehensions, generators)
-  â–¼
-[08: Functions & Scope]  â—„â”€â”€ (Day 5 Agenda `extra` + Lab 5.1)
-  â”‚
-  â–¼
+  │  (Lists, 2D trap, unpacking/deque, shallow/deep copy, comprehensions, Big-O)
+  ▼
+[08: Functions & Scope]
+  │  (def/calls, mutable defaults, *args/**kwargs, LEGB, nonlocal, map/filter/reduce, recursion)
+  ▼
 [09: Supplementary Bridges]
-     (Object-reference memory model, module imports, try/except preview)
+  │  (Object-reference memory model, module imports, try/except/finally)
+  ├─────────────────────────────────────────────┐
+  ▼                                              ▼
+[11: Tuples, Dicts & Sets]             [12: OOP Classes & Encapsulation]
+  │  (Tuples, namedtuple, dicts, hashability,     │  (__init__, self, methods, class vs instance,
+  │   collision trap, Counter, set algebra)       │   shared mutable trap, dunders, @property)
+  └──────────────────────┬──────────────────────┘
+                         ▼
+        [10: Central Exam Preparation Hub]
+           (40 MCQs, 42 Traps, 7 Drills, Solutions)
 ```
 
 ---
@@ -47,17 +56,16 @@ The original classroom decks split related topics across days and occasionally p
 | **06 Strings & Formatting** | `02` (indexing/immutability), `05` (iterating characters) | Text parsing, validation, `%`/`.format()`/f-string formatting |
 | **07 Lists & Comprehensions** | `02` (`==` vs `is`), `05` (`for` loops & `iter`), `06` (slicing) | Mutability, aliasing/copying, list/dict/set comprehensions, lazy generators |
 | **08 Functions & Scope** | `04` (early returns), `07` (mutable lists & aliasing) | Reusable functions, mutable-default trap, LEGB, object-reference passing |
-| **09 Supplementary Bridges** | `02`, `07`, `08` | Connects Week 1 previews (`try/except`, imports, object model) to Week 2â€“3 topics |
+| **09 Supplementary Bridges** | `02`, `07`, `08` | Connects Week 1 previews (`try/except`, imports, object model) to Week 2 topics |
+| **11 Tuples, Dicts & Sets** | `02` (hashability, immutability), `07` (sequences), `08` (functions) | Fast lookups, multiset counts (`Counter`), set algebra, structure selection |
+| **12 OOP & Encapsulation** | `08` (functions & scope), `09` (namespaces & exception objects) | Custom data modeling, instance vs class attributes, dunders, private mangling, properties |
+| **10 Exam Prep Hub** | `01`–`09`, `11`, `12` | Comprehensive exam readiness: 40 MCQs, 42 traps, 7 tracing drills, checklists |
 
 ---
 
 ## 3. Forward-Dependency Collisions Resolved From Slides
 
-1. **Strings Split (`Day 2` + `Day 4`):** `IMG-05` (`Â§2.11â€“2.21`) and `IMG-04`, `IMG-57`â€“`IMG-64` (`Â§5.8â€“5.25`) are unified in Module `06`.
+1. **Strings Split (`Day 2` + `Day 4`):** `IMG-05` (`§2.11–2.21`) and `IMG-04`, `IMG-57`–`IMG-64` (`§5.8–5.25`) are unified in Module `06`.
 2. **Comprehensions Before Lists (`Day 4` before `Day 5`):** `IMG-54` uses lists, dicts, and sets before Day 5 teaches lists (`IMG-78`). Moving comprehensions into Module `07` after basic list mechanics removes the forward jump.
-3. **Previewed Syntax Explained Early/Bridged:**
-   - `Day 1` (`IMG-22`) previews f-strings & `ValueError` ("Week 3").
-   - `Day 2` (`IMG-07`) uses `if (n := len("hello")) > 3:` before `if` statements.
-   - `Day 3` (`IMG-44`) uses `list(filter(bool, items))` and `lst[:]` before lists/slicing.
-   - `Day 4` (`IMG-76`) uses `try/except ValueError:` and `IMG-66` uses `dict.get(word, word)` before exceptions or dictionaries.
-   - `Day 5` (`IMG-67`) uses `from collections import deque` without an imports lesson.
+3. **Tuples, Dictionaries & Sets (`Day 8`):** Fully isolated into dedicated Module `11` with detailed coverage of `namedtuple`, hash collisions, `Counter`, and set algebra.
+4. **OOP & Encapsulation (`Day 9`):** Fully established as Module `12` providing the object model foundation before Day 10–11 inheritance and polymorphism.

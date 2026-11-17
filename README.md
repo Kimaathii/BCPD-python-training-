@@ -59,10 +59,10 @@ Quick access to all assessment and drill documents in `10-EXAM-PREPARATION/`:
 1. [Instructor Knowledge Checks](./10-EXAM-PREPARATION/instructor-knowledge-checks.md): **All 40 classroom MCQs from Days 1–9** with verified answer keys, detailed explanations, and distractor analyses.
 2. [MCQ Traps Bank](./10-EXAM-PREPARATION/mcq-traps-bank.md): **42 high-yield certification trap questions** across all syllabus domains (including `fromkeys` list trap, dict collision, set operator type errors, class attribute sharing, and name mangling).
 3. [Output Prediction Drills](./10-EXAM-PREPARATION/output-prediction-drills.md): 7 whiteboard & mental trace drills with line-by-line trace tables.
-4. [Sanfoundry Practice Sets](./10-EXAM-PREPARATION/sanfoundry-practice-sets.md): Curated problem sets referenced in instructor summaries (`IMG-31`, `IMG-49`).
-5. [Common Mistakes Cheat Sheet](./10-EXAM-PREPARATION/common-mistakes-cheat-sheet.md): Category F 18-trap quick reference ("Don't Do This" ➔ "Do This Instead").
-6. [Revision Checklist](./10-EXAM-PREPARATION/revision-checklist.md): Comprehensive readiness self-assessment checklist.
-7. [Separated Solutions](./10-EXAM-PREPARATION/solutions/): Clean reference implementations for all module exercises.
+4. [Sanfoundry Practice Sets](./10-EXAM-PREPARATION/sanfoundry-practice-sets.md): 7 curated problem sets referenced in instructor summaries (`IMG-31`, `IMG-49`) and Days 8 & 9.
+5. [Common Mistakes Cheat Sheet](./10-EXAM-PREPARATION/common-mistakes-cheat-sheet.md): Category F 32-trap quick reference ("Don't Do This" ➔ "Do This Instead").
+6. [Revision Checklist](./10-EXAM-PREPARATION/revision-checklist.md): 11-section comprehensive readiness self-assessment checklist.
+7. [Separated Solutions](./10-EXAM-PREPARATION/solutions/): Clean reference implementations for all module exercises (Modules 01–09, 11, 12).
 
 ---
 
@@ -76,4 +76,4 @@ $py = "C:\Users\kimat\AppData\Local\Python\pythoncore-3.15-64\python.exe"
 ```
 
 - **Target Python Version:** **Python 3.10+** (verified locally: **Python 3.15.2**).
-- **Test Results:** **31 / 31 test suites passing (100% success rate)** across all module examples, exercises, and solution runners.
+- **Test Results:** **33 / 33 test suites passing (100% success rate)** across all 11 module example suites, 11 exercise suites, and 11 solution runners.
