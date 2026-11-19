@@ -22,7 +22,8 @@
 | Functions, Mutable Default Trap, `*args`/`**kwargs`, LEGB Scope, `nonlocal`, `map`/`filter`/`reduce`, Recursion | `D5-01`–`D5-04` + `D6-06, 07, 10` | `08-FUNCTIONS-AND-SCOPE` | **100% Complete** |
 | Tuples, `namedtuple`, Dictionaries, Hashability, Collision Trap, `Counter`/`defaultdict`, Sets, Set Algebra | `D8-01`–`D8-14` | `11-TUPLES-DICTS-AND-SETS` | **100% Complete** |
 | Classes, `__init__`, `self`, Method Chaining, Class vs Instance Attributes, Shared Mutable Trap, Dunders, Encapsulation & Mangling, `@property`, UML Class Design, Lifecycle Destructor `__del__` | `D9-01`–`D9-11` + `D9-EXT-01`–`04` | `12-OOP-CLASSES-AND-ENCAPSULATION` | **100% Complete** |
-| Inheritance (IS-A), 6 Inheritance Types, `super()` & `__init__`, Method Overriding, Shared Template / Polymorphism, `isinstance`/`issubclass`, MRO (C3 Linearization), ABCs, Mixins, Dataclasses | `D10-01`–`D10-07` | `13-OOP-INHERITANCE-AND-MRO` | **100% Complete** |
+| Inheritance (IS-A), 6 Inheritance Types, `super()` & `__init__`, Method Overriding, Shared Template / Polymorphism, `isinstance`/`issubclass`, MRO (C3 Linearization), ABCs, Mixins, Dataclasses | `D10-01`–`D10-15` | `13-OOP-INHERITANCE-AND-MRO` | **100% Complete** |
+| Polymorphism & Duck Typing, Built-in Operator Matrix, Operator Overloading (`__rmul__`), Function Overloading Simulation (`@singledispatch`), Data Hiding & Memory Optimization (`__slots__`), SRP Class Design, LSP & Singleton, Lab 11.1 Matrix | `D11-01`–`D11-08` | `14-OOP-POLYMORPHISM-AND-DESIGN` | **100% Complete** |
 
 ---
 
@@ -49,7 +50,8 @@
 - **String Formatting Answers & Explanations:** Resolved by slide 16 (`D5-REV-05`) -> Integrated into Module `06` and `10-EXAM-PREPARATION`.
 - **Tuples, Namedtuples, Dictionaries, Sets:** Resolved by Day 8 slides (`D8-01`–`D8-14`) -> Integrated into Module `11`.
 - **OOP Classes, Instances, Attributes, Dunders, Encapsulation, Properties, UML, Lifecycle:** Resolved by Day 9 slides (`D9-01`–`D9-11`, `D9-EXT-01`–`04`) -> Integrated into Module `12`.
-- **Inheritance, `super()`, MRO & C3 Linearization, Abstract Base Classes, Dataclasses:** Resolved by Day 10 slides (`D10-01`–`D10-07`) -> Integrated into Module `13`.
+- **Inheritance, `super()`, MRO & C3 Linearization, Abstract Base Classes, Dataclasses:** Resolved by Day 10 slides (`D10-01`–`D10-15`) -> Integrated into Module `13`.
+- **Polymorphism, Duck Typing, Operator Overloading, __slots__, SRP Design, Lab 11.1 Matrix:** Resolved by Day 11 slides (`D11-01`–`D11-08`) -> Integrated into Module `14`.
 
 ---
 

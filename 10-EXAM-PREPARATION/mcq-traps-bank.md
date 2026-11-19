@@ -800,4 +800,128 @@ class Inventory:
 - **Correct Answer: C** `[Course: D10-02, Manual §11.9]`
 - **Analysis:** The standard `@dataclass` decorator actively prohibits mutable default argument values (like `[]` or `{}`) to prevent shared mutation bugs, raising `ValueError`. The required pattern is `items: list = field(default_factory=list)`.
 
+---
+
+## Part 11: Polymorphism, Operator Overloading & Slots Traps (Day 11)
+
+### Question T-48: Function Overwriting in Local Scope
+What is printed by:
+```python
+def calc(x):
+    return x * 2
+
+def calc(x, y):
+    return x + y
+
+try:
+    print(calc(10))
+except Exception as e:
+    print(type(e).__name__)
+```
+- A) `20`
+- B) `TypeError`
+- C) `NameError`
+- D) `SyntaxError`
+- **Correct Answer: B** `[Course: D11-06]`
+- **Analysis:** Python has no compile-time function overloading. Defining `calc(x, y)` replaces `calc(x)` in the namespace. Calling `calc(10)` with 1 argument raises `TypeError: calc() missing 1 required positional argument: 'y'`.
+
+---
+
+### Question T-49: Left vs. Right Multiplication Protocol
+Given:
+```python
+class Item:
+    def __init__(self, price):
+        self.price = price
+    def __mul__(self, qty):
+        return self.price * qty
+
+item = Item(50)
+print(item * 3)
+print(3 * item)
+```
+What is the outcome of the two print statements?
+- A) Prints `150` followed by `150`
+- B) Prints `150` followed by `TypeError`
+- C) Raises `TypeError` on the first line
+- D) Prints `(50, 50, 50)`
+- **Correct Answer: B** `[Course: D11-05]`
+- **Analysis:** `item * 3` invokes `item.__mul__(3)` returning `150`. But `3 * item` invokes `int.__mul__(3, item)`, which returns `NotImplemented`. Python then looks for `Item.__rmul__`. Because `__rmul__` was omitted, Python raises `TypeError`.
+
+---
+
+### Question T-50: Attribute Creation on `__slots__` Instances
+Given:
+```python
+class Point:
+    __slots__ = ("x", "y")
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+p = Point(1, 2)
+p.z = 3
+```
+What occurs on the line `p.z = 3`?
+- A) Attribute `z` is created dynamically.
+- B) Raises `AttributeError: 'Point' object has no attribute 'z'`
+- C) Raises `KeyError`
+- D) `z` is stored in a hidden `__dict__`
+- **Correct Answer: B** `[Course: D11-07]`
+- **Analysis:** `__slots__` prevents the creation of a per-instance `__dict__`. Only attributes explicitly declared in `__slots__` can be assigned; assigning any undeclared attribute raises `AttributeError`.
+
+---
+
+### Question T-51: Introspection on Slotted Instances
+Given `p = Point(1, 2)` from Question T-50, what does `vars(p)` evaluate to?
+- A) `{'x': 1, 'y': 2}`
+- B) `('x', 'y')`
+- C) Raises `TypeError: vars() argument must have __dict__ attribute`
+- D) `None`
+- **Correct Answer: C** `[Course: D11-07]`
+- **Analysis:** `vars(obj)` is defined in Python to return `obj.__dict__`. Since slotted instances have no `__dict__`, calling `vars()` raises `TypeError`.
+
+---
+
+### Question T-52: Single Dispatch First Argument Constraint
+Given:
+```python
+from functools import singledispatch
+
+@singledispatch
+def show(a, b):
+    return "default"
+
+@show.register
+def _(a: int, b: str):
+    return "int-str"
+
+print(show(1, 100))
+```
+What is printed?
+- A) `default`
+- B) `int-str`
+- C) `TypeError`
+- D) `AttributeError`
+- **Correct Answer: B** `[Course: D11-06]`
+- **Analysis:** `@singledispatch` dispatches based **solely** on the type of the **first** argument (`a`). Because `a` is an `int`, the registered function is chosen regardless of `b`'s type.
+
+---
+
+### Question T-53: Duck Typing in Iteration
+What is returned by:
+```python
+def combine(items):
+    return sum(len(x) for x in items)
+
+print(combine(["ab", [1, 2], {"x": 1, "y": 2, "z": 3}]))
+```
+- A) Raises `TypeError` because the list contains mixed container types
+- B) `7`
+- C) `3`
+- D) `0`
+- **Correct Answer: B** `[Course: D11-03]`
+- **Analysis:** Duck typing allows any object that implements `__len__` to be passed to `len()`. The lengths are `2` (string), `2` (list), and `3` (dict), summing to `2 + 2 + 3 = 7`.
+
+
 

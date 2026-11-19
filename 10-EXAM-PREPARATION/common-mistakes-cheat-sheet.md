@@ -92,3 +92,16 @@
 | **T38** | Expecting child `self.__secret` to overwrite parent's:<br>`class Child(Parent): self.__secret = 99` | Double underscore attributes are mangled to `_Parent__secret` and `_Child__secret` independently. | Use single underscore `_secret` for inheritable attributes intended for subclass modification. | `D10-05` |
 | **T39** | Using mutable default in `@dataclass`:<br>`@dataclass class Group: members: list = []` | Raises `ValueError` at class creation time because dataclass proactively blocks the shared mutable default trap. | Use `field(default_factory=list)` for list, dict, or set fields. | `D10-02` |
 
+---
+
+## 8. Polymorphism, Operator Overloading & Slots Traps (Day 11)
+
+| # | Trap / Anti-Pattern | Why It Breaks | Do This Instead | Course Citation |
+|---|---|---|---|---|
+| **T40** | Sequential duplicate function definition:<br>`def f(x): pass; def f(x, y): pass` | Python has no native function overloading; second `def` replaces the first in namespace. | Use default arguments `def f(x, y=None):` or `@singledispatch`. | `D11-06` |
+| **T41** | Forgetting reflected operator:<br>`2 * v` with only `__mul__` | Left operand `int` does not know `Vector`; raises `TypeError: unsupported operand`. | Implement `__rmul__(self, k): return self * k`. | `D11-05` |
+| **T42** | Undeclared attribute assignment in slotted class:<br>`fixed.z = 10` | `__slots__ = ("x", "y")` prohibits undeclared attributes; raises `AttributeError`. | Declare all required fields in `__slots__`. | `D11-07` |
+| **T43** | Calling `vars()` on slotted instance:<br>`vars(fixed_obj)` | Slotted instances have no `__dict__`; `vars()` raises `TypeError`. | Access attributes by name directly. | `D11-07` |
+| **T44** | In-place mutation in binary operator:<br>`def __add__(self, other): self.v += other.v; return self` | Binary operators must return a fresh object; in-place mutation corrupts existing operands. | Always return a new instance: `return Cls(self.v + other.v)`. | `D11-05` |
+| **T45** | Expecting `@singledispatch` to check all args:<br>`@singledispatch def f(a, b):` | `@singledispatch` inspects the type of **only the first argument** `a`. | Handle multiple arguments with nested `isinstance` checks. | `D11-06` |
+

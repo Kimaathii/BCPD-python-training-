@@ -40,10 +40,14 @@ The original classroom decks split related topics across days and occasionally p
   │                                    [13: OOP Inheritance & MRO]
   │                                       (IS-A, super(), overriding, MRO/C3,
   │                                        isinstance vs type, ABCs, dataclasses)
+  │                                              ▼
+  │                                    [14: OOP Polymorphism & Design]
+  │                                       (Duck typing, operator overloading,
+  │                                        singledispatch, __slots__, SRP, Matrix)
   └──────────────────────┬───────────────────────┘
                          ▼
         [10: Central Exam Preparation Hub]
-           (45 MCQs, 47 Traps, 7 Drills, Solutions)
+           (50 MCQs, 53 Traps, 7 Drills, Solutions)
 ```
 
 ---
@@ -64,7 +68,8 @@ The original classroom decks split related topics across days and occasionally p
 | **11 Tuples, Dicts & Sets** | `02` (hashability, immutability), `07` (sequences), `08` (functions) | Fast lookups, multiset counts (`Counter`), set algebra, structure selection |
 | **12 OOP & Encapsulation** | `08` (functions & scope), `09` (namespaces & exception objects) | Custom data modeling, instance vs class attributes, dunders, private mangling, properties, UML design, lifecycle |
 | **13 OOP Inheritance & MRO** | `12` (classes & instances) | Subclassing, parent calls (`super()`), method overriding, shared templates, MRO / C3 linearization, ABCs, dataclasses |
-| **10 Exam Prep Hub** | `01`–`09`, `11`, `12`, `13` | Comprehensive exam readiness: 45 MCQs, 47 traps, 7 tracing drills, checklists |
+| **14 OOP Polymorphism & Design** | `12`, `13` | Duck typing, operator overloading (`__rmul__`), `@singledispatch`, `__slots__`, SRP, LSP, Matrix class |
+| **10 Exam Prep Hub** | `01`–`09`, `11`, `12`, `13`, `14` | Comprehensive exam readiness: 50 MCQs, 53 traps, 7 tracing drills, checklists |
 
 ---
 
@@ -75,3 +80,4 @@ The original classroom decks split related topics across days and occasionally p
 3. **Tuples, Dictionaries & Sets (`Day 8`):** Fully isolated into dedicated Module `11` with detailed coverage of `namedtuple`, hash collisions, `Counter`, and set algebra.
 4. **OOP & Encapsulation (`Day 9`):** Fully established as Module `12` providing the object model foundation before Day 10–11 inheritance and polymorphism.
 5. **OOP Inheritance & MRO (`Day 10`):** Structured as Module `13` covering Manual Day 11 (§11.1–11.10), resolving multiple inheritance, MRO linearization, and abstract interfaces.
+6. **OOP Polymorphism & Design (`Day 11`):** Structured as Module `14` covering Manual Day 12 (§12.1–12.6) + Day 13 (§13.1–13.5), mastering dynamic polymorphism, dunder arithmetic protocols, memory-efficient slotted structures, and clean architecture.

@@ -231,6 +231,59 @@ def test_dataclasses_basics():
     assert d2.members == []  # Independent lists!
 
 
+def test_construct_lifecycle_and_dispatch():
+    """Verifies construct.py __new__, __init__, self-dispatch, and private names [Course: D10-10]."""
+    trace = []
+    class Base:
+        def __new__(cls, *args):
+            trace.append("1. __new__ creates")
+            return super().__new__(cls)
+
+        def __init__(self):
+            trace.append("2. __init__ initialises")
+            self.__secret = "base"
+            self.setup()
+
+        def setup(self):
+            trace.append("Base.setup")
+
+    class Child(Base):
+        def __init__(self):
+            Base.__init__(self)  # explicit parent call alternative to super()
+
+        def setup(self):
+            trace.append("Child.setup")
+
+    c = Child()
+    assert trace == ["1. __new__ creates", "2. __init__ initialises", "Child.setup"]
+    assert c._Base__secret == "base"
+    assert hasattr(c, "__secret") is False
+
+
+def test_hierarchy_lab_10_1():
+    """Verifies hierarchy.py Square(Rectangle) and MRO [Course: D10-14]."""
+    class Shape(ABC):
+        @abstractmethod
+        def area(self):
+            ...
+
+    class Rectangle(Shape):
+        def __init__(self, w, h):
+            self.w, self.h = w, h
+
+        def area(self):
+            return self.w * self.h
+
+    class Square(Rectangle):
+        def __init__(self, side):
+            super().__init__(side, side)
+
+    sq = Square(4)
+    assert sq.area() == 16
+    mro_names = [c.__name__ for c in Square.__mro__]
+    assert mro_names == ["Square", "Rectangle", "Shape", "ABC", "object"]
+
+
 def main():
     print("Running Module 13: OOP Inheritance & MRO test suite...")
     test_day10_title_script()
@@ -242,6 +295,8 @@ def main():
     test_private_attribute_mangling_in_inheritance()
     test_abstract_base_class()
     test_dataclasses_basics()
+    test_construct_lifecycle_and_dispatch()
+    test_hierarchy_lab_10_1()
     print("All Module 13 examples PASSED cleanly (100% verified against Day 10 slides).")
 
 

@@ -474,73 +474,100 @@ class Dog:
 
 ---
 
-## Day 10 Knowledge Check: OOP Inheritance & the MRO `[Course: D10-01 to D10-07]`
+## Day 10 Knowledge Check: OOP Inheritance & the MRO `[Course: D10-15]`
 
-### Question 10.1
-**What happens if a child class defines its own `__init__()` method but does not call `super().__init__()`?**
-- A) Python automatically calls the parent's `__init__()` in the background.
-- B) The parent's attributes are never initialized on the child instance, causing `AttributeError` when accessed.
-- C) Python raises a compilation `SyntaxError`.
-- D) The child class cannot be instantiated.
-- **Correct Answer:** **B** `[Course: D10-05]`
-- **Explanation:** Python does not automatically invoke a base class `__init__()` when overridden by a derived class. If `super().__init__()` is omitted, the parent's initialization code never runs, and any attributes expected from the parent will be missing.
+### Question 10.1 (Official Classroom Quiz)
+**Which call runs the parent's `__init__` from inside a child's `__init__`?**
+- A) `parent.__init__()`
+- B) `super().__init__()`
+- C) `self.__init__()`
+- D) `base()`
+- **Correct Answer:** **B** `[Course: D10-15]`
+- **Explanation:** `super().__init__()` is the standard built-in mechanism to call the parent class's constructor according to the MRO, automatically binding `self`.
 
-### Question 10.2
-**Given the following diamond hierarchy, what is the output of `D().ping()`?**
-```python
-class A:
-    def ping(self): return "A"
-class B(A):
-    def ping(self): return "B"
-class C(A):
-    def ping(self): return "C"
-class D(B, C):
-    pass
-```
-- A) `"A"`
-- B) `"B"`
-- C) `"C"`
-- D) Raises `TypeError: Ambiguous MRO`
-- **Correct Answer:** **B** `[Course: D10-04, D10-06]`
-- **Explanation:** Python resolves multiple inheritance using the C3 Linearization algorithm. The Method Resolution Order for `D` is `[D, B, C, A, object]`. Since `B` appears before `C`, `B.ping()` is chosen first and returns `"B"`.
+### Question 10.2 (Official Classroom Quiz)
+**With `class D(B, C)` where B and C both define `go()`, `D().go()` runs...**
+- A) Both
+- B) `C.go`
+- C) Error
+- D) `B.go`
+- **Correct Answer:** **D** `[Course: D10-15]`
+- **Explanation:** In multiple inheritance, C3 Linearization inspects base classes in left-to-right order as defined in the class declaration `(B, C)`. Therefore, `B.go` is visited and executed before `C.go`.
 
-### Question 10.3
-**What does `isinstance(True, int)` evaluate to in Python, and why?**
-- A) `False`, because booleans and integers are distinct primitive types.
-- B) `True`, because `bool` is a built-in subclass of `int`.
-- C) Raises `TypeError`.
-- D) `True`, only if explicit casting `int(True)` was performed.
-- **Correct Answer:** **B** `[Course: D10-07]`
-- **Explanation:** In Python, `bool` inherits from `int` (`issubclass(bool, int) is True`). Therefore, `isinstance(True, int)` is `True`. Note that `type(True) is int` evaluates to `False` because `type()` checks exact class identity.
+### Question 10.3 (Official Classroom Quiz)
+**Given `class A: pass` and `class B(A): pass`, what is `isinstance(B(), A)`?**
+- A) `True`
+- B) `False`
+- C) `None`
+- D) `Error`
+- **Correct Answer:** **A** `[Course: D10-15]`
+- **Explanation:** `isinstance(obj, Cls)` evaluates to `True` if `obj` is an instance of `Cls` or any class derived from `Cls`. Since `B` inherits from `A`, `isinstance(B(), A)` is `True`.
 
-### Question 10.4
-**What occurs when attempting to instantiate an Abstract Base Class that has unimplemented abstract methods?**
-```python
-from abc import ABC, abstractmethod
-class Base(ABC):
-    @abstractmethod
-    def run(self): pass
-b = Base()
-```
-- A) Instantiation succeeds, but calling `b.run()` raises `NotImplementedError`.
-- B) Raises `TypeError: Can't instantiate abstract class Base without an implementation for abstract method 'run'`.
-- C) Returns a mock proxy object.
-- D) Compiles to `None`.
-- **Correct Answer:** **B** `[Course: D10-02, Manual §11.6]`
-- **Explanation:** Python's `ABCMeta` metaclass prevents instantiation of any class with unimplemented `@abstractmethod`s by raising a `TypeError` at construction time.
+### Question 10.4 (Official Classroom Quiz)
+**What happens if you instantiate a class with an unimplemented `@abstractmethod`?**
+- A) It returns `None`
+- B) `TypeError` is raised
+- C) A warning is printed
+- D) It works normally
+- **Correct Answer:** **B** `[Course: D10-15]`
+- **Explanation:** Python's abstract base class mechanism prohibits instantiation of classes that have unimplemented abstract methods by raising a runtime `TypeError: Can't instantiate abstract class with abstract methods`.
 
-### Question 10.5
-**In Python 3.7+, what happens if you declare a mutable default in a `@dataclass` as follows?**
-```python
-from dataclasses import dataclass
-@dataclass
-class Group:
-    members: list = []
-```
-- A) Every instance of `Group` gets an independent empty list.
-- B) Raises `ValueError: mutable default <class 'list'> for field members is not allowed: use default_factory`.
-- C) Silently converts the list to an immutable tuple.
-- D) Syntax error at line 3.
-- **Correct Answer:** **B** `[Course: D10-02, Manual §11.9]`
-- **Explanation:** The `@dataclass` decorator explicitly inspects default field values. To protect developers from the classic shared mutable default argument bug, it raises a `ValueError` if a mutable default like `[]` or `{}` is passed directly, requiring `field(default_factory=list)`.
+### Question 10.5 (Official Classroom Quiz)
+**Which relationship should use composition rather than inheritance?**
+- A) `Dog -> Animal`
+- B) `Manager -> Employee`
+- C) `Car -> Engine`
+- D) `Square -> Shape`
+- **Correct Answer:** **C** `[Course: D10-15]`
+- **Explanation:** A Car *has an* Engine (HAS-A relationship), whereas Dog is an Animal, Manager is an Employee, and Square is a Shape (IS-A relationships). HAS-A relationships should always use composition.
+
+---
+
+## Day 11 Knowledge Check: Polymorphism, Overloading & OOP Design `[Course: D11-01 to D11-08]`
+
+### Question 11.1
+**What is duck typing in Python?**
+- A) Enforcing that every class must inherit from a single abstract `Duck` base class.
+- B) A design philosophy where an object's suitability is determined by the presence of certain methods and properties, rather than its inheritance hierarchy.
+- C) A compiler optimization technique for floating-point calculations.
+- D) A method of type checking using static C-types.
+- **Correct Answer:** **B** `[Course: D11-03]`
+- **Explanation:** Duck typing means Python checks whether a method or attribute exists when it is accessed, rather than checking whether the object inherits from a specific type ("If it walks like a duck and quacks like a duck...").
+
+### Question 11.2
+**Given a user-defined class `Vector` that only implements `__mul__(self, k)`, what happens when evaluating `2 * Vector(3, 4)`?**
+- A) Evaluates to `Vector(6, 8)`.
+- B) Raises `TypeError: unsupported operand type(s) for *: 'int' and 'Vector'`.
+- C) Silently evaluates to `0`.
+- D) Converts `Vector` to an integer.
+- **Correct Answer:** **B** `[Course: D11-05]`
+- **Explanation:** When the left operand is an `int` (`2`), Python calls `int.__mul__(2, v)`. Since `int` does not recognize `Vector`, Python looks for the reflected operator `__rmul__` on `Vector`. Because `__rmul__` was not defined, a `TypeError` is raised.
+
+### Question 11.3
+**In Python, what happens if two functions with the exact same name are defined sequentially in the same scope?**
+- A) Python overloads them based on parameter types and counts.
+- B) A `SyntaxError: duplicate function definition` is raised.
+- C) The second function definition completely overwrites and replaces the first.
+- D) Python creates a tuple containing both functions.
+- **Correct Answer:** **C** `[Course: D11-06]`
+- **Explanation:** Python has no native compile-time function overloading. The `def` statement binds the function object to the function name in the local namespace. A second `def` simply rebinds that name to the second function object.
+
+### Question 11.4
+**What is the effect of defining `__slots__ = ("x", "y")` in a Python class?**
+- A) It encrypts attributes `x` and `y` in memory.
+- B) It prevents the creation of an instance `__dict__`, restricting allowed instance attributes strictly to `'x'` and `'y'`.
+- C) It marks `x` and `y` as private name-mangled variables.
+- D) It automatically implements `@property` getters and setters for `x` and `y`.
+- **Correct Answer:** **B** `[Course: D11-07]`
+- **Explanation:** `__slots__` tells Python not to create a per-instance `__dict__`. Instead, it allocates fixed C-level descriptor slots, reducing memory consumption and raising `AttributeError` if external code attempts to assign an undeclared attribute.
+
+### Question 11.5
+**What does the Single Responsibility Principle (SRP) dictate for class design?**
+- A) Every class must contain only a single method.
+- B) A class should have only one reason to change, encapsulating a single cohesive responsibility.
+- C) A class can only be instantiated once (Singleton).
+- D) All class attributes must be private.
+- **Correct Answer:** **B** `[Course: D11-08]`
+- **Explanation:** SRP states that each class should be responsible for a single part of software functionality (e.g. data modeling separate from database persistence or email reporting), ensuring modularity and low coupling.
+
 

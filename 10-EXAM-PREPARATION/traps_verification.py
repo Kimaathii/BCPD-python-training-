@@ -7,6 +7,7 @@ Purpose: Programmatically asserts the exact CPython behavior for all traps docum
 from abc import ABC, abstractmethod
 from collections import Counter, defaultdict, namedtuple
 from dataclasses import dataclass, field
+from functools import singledispatch
 import math
 import sys
 
@@ -381,6 +382,75 @@ def test_domain_13_inheritance_and_mro():
         pass
 
 
+def test_domain_14_polymorphism_and_design():
+    # Trap 14.1: Sequential def replaces earlier function
+    def calc(a):
+        return a * 2
+    def calc(a, b):
+        return a + b
+    try:
+        calc(10)  # type: ignore
+        assert False, "Should raise TypeError because calc(a, b) replaced calc(a)"
+    except TypeError:
+        pass
+
+    # Trap 14.2: Reverse operator failure (2 * v requires __rmul__)
+    class Multiplier:
+        def __init__(self, val):
+            self.val = val
+        def __mul__(self, k):
+            return self.val * k
+    m = Multiplier(10)
+    assert m * 2 == 20
+    try:
+        _ = 2 * m  # type: ignore
+        assert False, "Should raise TypeError when __rmul__ is not defined"
+    except TypeError:
+        pass
+
+    # Trap 14.3: Undeclared attribute on slotted instance
+    class Fixed:
+        __slots__ = ("x", "y")
+        def __init__(self, x, y):
+            self.x, self.y = x, y
+    f = Fixed(1, 2)
+    try:
+        f.z = 10  # type: ignore
+        assert False, "Should raise AttributeError on undeclared slotted attribute"
+    except AttributeError:
+        pass
+
+    # Trap 14.4: Slotted instance has no __dict__
+    assert hasattr(f, "__dict__") is False
+    try:
+        vars(f)
+        assert False, "vars() on slotted object should raise TypeError"
+    except TypeError:
+        pass
+
+    # Trap 14.5: Mutating in-place during operator overloading
+    class BadCounter:
+        def __init__(self, val):
+            self.val = val
+        def __add__(self, other):
+            self.val += other.val
+            return self
+    b1 = BadCounter(5)
+    b2 = BadCounter(10)
+    b3 = b1 + b2
+    assert b1 is b3  # Mutated in place!
+    assert b1.val == 15
+
+    # Trap 14.6: @singledispatch dispatches only on first argument
+    @singledispatch
+    def multi(a, b):
+        return "fallback"
+    @multi.register
+    def _(a: int, b: str):
+        return "int-dispatch"
+    assert multi(1, 999) == "int-dispatch"  # Ignores type of b!
+
+
 def main():
     print("Running Master Exam Traps Verification Suite...")
     test_domain_1_syntax_and_env()
@@ -396,7 +466,8 @@ def main():
     test_domain_11_dicts_and_sets()
     test_domain_12_oop_and_encapsulation()
     test_domain_13_inheritance_and_mro()
-    print("All 42+ Exam Traps rigorously verified and PASSED against CPython runtime.")
+    test_domain_14_polymorphism_and_design()
+    print("All 48+ Exam Traps rigorously verified and PASSED against CPython runtime.")
 
 
 if __name__ == "__main__":

@@ -149,3 +149,23 @@
 - [ ] Implement `@dataclass` for clean data containers with automatic `__init__`, `__repr__`, `__eq__`, and `frozen=True` immutability. `[D10-02]`
 - [ ] Avoid the dataclass mutable default error by using `field(default_factory=list)`. `[D10-02]`
 
+---
+
+## 13. Polymorphism, Overloading & OOP Design `[Module 14]`
+- [ ] Explain duck typing: suitability is determined by presence of methods/properties without requiring a common inheritance base. `[D11-03]`
+- [ ] Trace built-in polymorphism for operators (`+`, `*`) and functions (`len`, `in`, `max`) across numbers, strings, and lists. `[D11-04]`
+- [ ] Overload binary operators via dunders (`__add__`, `__sub__`, `__mul__`, `__truediv__`) and always return a new instance. `[D11-05]`
+- [ ] Implement reflected operators (`__rmul__`, `__radd__`) so expressions with primitive types on the left (e.g. `2 * v`) succeed. `[D11-05]`
+- [ ] Use `functools.total_ordering` with `__eq__` and `__lt__` to generate all six comparison operators. `[D11-05]`
+- [ ] Understand that Python has no native function overloading; sequential `def` with the same name replaces earlier definitions. `[D11-06]`
+- [ ] Simulate function overloading with default arguments (`b=None`) or `functools.singledispatch`. `[D11-06]`
+- [ ] Remember that `@singledispatch` dispatches solely on the type of the **first** positional argument. `[D11-06]`
+- [ ] Optimize memory and prevent attribute typos using `__slots__ = ("x", "y")`. `[D11-07]`
+- [ ] Recall that slotted instances do not have a `__dict__` (`hasattr(p, "__dict__") is False`), causing `vars(p)` to raise `TypeError`. `[D11-07]`
+- [ ] Apply Single Responsibility Principle (SRP): each class encapsulates one cohesive responsibility. `[D11-08]`
+- [ ] Enforce fail-early validation inside constructors (`__init__`), raising `ValueError` rather than leaving an object in broken state. `[D11-08]`
+- [ ] Implement alternative factory constructors with `@classmethod` and pure utility methods with `@staticmethod`.
+- [ ] Enforce the Singleton pattern using `__new__` to restrict a class to a single heap instance.
+- [ ] Build Lab 11.1 Matrix class with rectangular validation, element-wise addition, scalar multiplication, and reflected operators.
+
+

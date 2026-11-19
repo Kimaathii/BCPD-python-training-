@@ -227,15 +227,15 @@ print(isinstance(3, (int, float)))                  # True
 
 ---
 
-## 6. Multiple Inheritance & The Diamond Problem (`§11.5`)
+## 6. Multiple Inheritance & The Diamond Problem (`§11.5`) `[Course: D10-08, D10-09]`
 
 When a class inherits from multiple parents, Python uses the **C3 Linearization Algorithm** to construct an unambiguous, monotonic Method Resolution Order (MRO).
 
 ```mermaid
 flowchart TD
-    A["class A\ndef ping(): return 'A'"]
-    B["class B(A)\ndef ping(): return 'B'"]
-    C["class C(A)\ndef ping(): return 'C'"]
+    A["class A\ndef hello(): return 'A'"]
+    B["class B(A)\ndef hello(): return 'B'"]
+    C["class C(A)\ndef hello(): return 'C'"]
     D["class D(B, C)\n# Inherits from B and C"]
     A --> B
     A --> C
@@ -243,83 +243,120 @@ flowchart TD
     C --> D
 ```
 
-### The C3 Linearization Rules:
-1. Subclasses appear **before** their parent classes.
-2. If a class inherits from multiple parents, their declared order is preserved (`class D(B, C)` searches `B` before `C`).
-3. Each class appears in the MRO exactly **once**.
+### 6.1 The 4-Step C3 Linearization Sequence `[Course: D10-09]`:
+1. **The class itself**: Python searches `D` first.
+2. **Parents, left to right**: Then `B`, then `C` — the exact order written in `class D(B, C)`.
+3. **Shared base last**: `A` comes after all of its derived children, so it is searched only once.
+4. **Finally `object`**: Every MRO terminates at `object`. Any impossible or cyclic order raises `TypeError`.
 
 ```python
+# ORIGINAL CLASSROOM CODE [Course: D10-08: mro.py]
 class A:
-    def ping(self): return "A"
+    def hello(self):
+        return "A"
 
 class B(A):
-    def ping(self): return "B"
+    def hello(self):
+        return "B"
 
 class C(A):
-    def ping(self): return "C"
+    def hello(self):
+        return "C"
 
 class D(B, C):
     pass
 
-d = D()
-print(d.ping())  # -> "B" (B comes before C in D's definition)
-print(D.mro())   # -> [D, B, C, A, object]
+print(D().hello())                             # -> B
+print([k.__name__ for k in D.__mro__])        # -> ['D', 'B', 'C', 'A', 'object']
 ```
+
+> [!CRITICAL]
+> **Cooperative Multiple Inheritance Trap `[Course: D10-09]`:**  
+> For an instance of `D`, calling `super().hello()` inside class `B` invokes **`C.hello()`**, **NOT** `A.hello()`!  
+> Why? Because `super()` looks up the *next class in the instance's MRO*. Since `D`'s MRO is `[D, B, C, A, object]`, the class immediately following `B` is `C`!
 
 ---
 
-## 7. Constructors & Private Name Mangling Across Hierarchies (`§11.2`)
+## 7. Constructors, `__new__` vs `__init__` & Cross-Hierarchy Private Names (`§11.2, §11.5`) `[Course: D10-10]`
 
-Private attributes prefixed with double underscores (`__`) undergo **name mangling**:
-- In class `Parent`, `self.__value` becomes `_Parent__value`.
-- In class `Child(Parent)`, `self.__value` becomes `_Child__value`.
+### 7.1 The Two-Phase Object Construction Lifecycle:
+- **`__new__(cls, *args)`**: The allocator. Creates and returns a fresh, uninitialized object instance in heap memory.
+- **`__init__(self, *args)`**: The initializer. Populates attributes on the already-created instance.
+
+### 7.2 Method Dispatch Through `self`:
+When a parent method invokes `self.method()`, Python resolves `method` starting from the dynamic type of `self` (the concrete child class), executing any child override!
 
 ```python
-class Parent:
-    def __init__(self):
-        self.__secret = 42
+# ORIGINAL CLASSROOM CODE [Course: D10-10: construct.py]
+class Base:
+    def __new__(cls, *args):
+        print("1. __new__ creates")
+        return super().__new__(cls)
 
-    def get_secret(self):
-        return self.__secret
-
-class Child(Parent):
     def __init__(self):
-        super().__init__()
-        self.__secret = 99  # Does NOT overwrite _Parent__secret!
+        print("2. __init__ initialises")
+        self.__secret = "base"                 # stored as _Base__secret
+        self.setup()                           # dispatches to the child!
+
+    def setup(self):
+        print("Base.setup")
+
+
+class Child(Base):
+    def __init__(self):
+        Base.__init__(self)                   # explicit parent call alternative to super()
+
+    def setup(self):
+        print("Child.setup")
+
 
 c = Child()
-print(c.get_secret())  # -> 42 (reads _Parent__secret)
-print(c._Child__secret)   # -> 99
-print(c._Parent__secret)  # -> 42
+# Console Output:
+# 1. __new__ creates
+# 2. __init__ initialises
+# Child.setup
+print(c._Base__secret)                        # -> base
 ```
-This protects parent implementation details from accidental overwrite by subclasses.
+
+### 7.3 Private Name Mangling Isolation
+- Inside `Base`, `self.__secret` compiles to `_Base__secret`.
+- If `Child` creates `self.__secret`, it compiles to `_Child__secret`.
+- Subclasses **cannot** accidentally overwrite parent private state.
 
 ---
 
-## 8. Abstract Base Classes (`abc.ABC`) (`§11.6`)
+## 8. Abstract Base Classes (`abc.ABC`) (`§11.6`) `[Course: D10-11]`
 
 When you want to define an interface contract that all subclasses **must** implement, use the standard library `abc` module:
 
 ```python
+# ORIGINAL CLASSROOM CODE [Course: D10-11: abstract.py]
 from abc import ABC, abstractmethod
 
-class PaymentGateway(ABC):
+class Shape(ABC):
     @abstractmethod
-    def process_payment(self, amount: float) -> bool:
-        """Subclasses must implement this method."""
-        pass
+    def area(self):
+        """..."""
 
-class StripeGateway(PaymentGateway):
-    def process_payment(self, amount: float) -> bool:
-        return True
+    def describe(self):
+        return f"Area = {self.area()}"
 
-# If a subclass forgets to implement any abstract method:
-class IncompleteGateway(PaymentGateway):
-    pass
 
-# Attempting to instantiate raises TypeError!
-# IncompleteGateway() -> TypeError: Can't instantiate abstract class IncompleteGateway with abstract method process_payment
+class Rect(Shape):
+    def __init__(self, w, h):
+        self.w, self.h = w, h
+
+    def area(self):
+        return self.w * self.h
+
+
+print(Rect(2, 3).describe())                  # -> Area = 6
+# Shape() raises TypeError: Can't instantiate abstract class Shape with abstract method area
 ```
+
+- **`ABC`**: Inherit from `abc.ABC` to declare an abstract base class.
+- **`@abstractmethod`**: Subclasses must implement it, or they cannot be instantiated (`TypeError`).
+- **Why**: Enforces interface conformance — the "abstraction" pillar of OOP.
 
 ---
 
@@ -361,56 +398,88 @@ print(u.to_json())  # {"name": "Alice", "role": "Admin"}
 
 ---
 
-## 10. Dataclasses (Python 3.7+) (`§11.9`)
+## 10. Dataclasses (Python 3.7+) (`§11.9`) `[Course: D10-13]`
 
-The `@dataclass` decorator automatically writes boilerplate dunder methods (`__init__`, `__repr__`, `__eq__`) based on type-annotated class attributes:
+The `@dataclass` decorator automatically generates boilerplate dunder methods (`__init__`, `__repr__`, `__eq__`) from type-annotated attributes:
 
 ```python
+# ORIGINAL CLASSROOM CODE [Course: D10-13: dataclasses_demo.py]
 from dataclasses import dataclass, field
 
-@dataclass(frozen=True)  # Makes instances immutable and hashable
+@dataclass(order=True)
 class Point:
-    x: float
-    y: float
+    x: int
+    y: int = 0
 
-p1 = Point(1.0, 2.0)
-p2 = Point(1.0, 2.0)
-print(p1)          # Point(x=1.0, y=2.0)
-print(p1 == p2)    # True (automatic __eq__)
-# p1.x = 5.0       # Raises FrozenInstanceError!
 
 @dataclass
-class Classroom:
+class Team:
     name: str
-    # MUTABLE DEFAULT TRAP FIX:
-    # students: list = []  # ValueError: mutable default is not allowed!
-    students: list = field(default_factory=list)
+    members: list = field(default_factory=list)
+
+
+p = Point(1, 2)
+print(p)                                      # Point(x=1, y=2)
+print(p == Point(1, 2))                       # True
+print(Point(1) < Point(2))                    # True (order=True generates <, >, <=, >=)
+print(Team("A"))                              # Team(name='A', members=[])
 ```
+
+### Key Dataclass Rules:
+- **Defaults**: Defaults must appear *after* non-default parameters (`y: int = 0`).
+- **Mutable Default Trap**: Direct mutable defaults like `members: list = []` raise `ValueError` at class creation time. Always use `field(default_factory=list)`.
+- **`order=True`**: Generates rich comparison methods (`__lt__`, `__le__`, `__gt__`, `__ge__`) using tuple field comparisons.
+- **`frozen=True`**: Makes instances immutable and hashable (assigning raises `FrozenInstanceError`).
+- **Inheritance**: Subclass fields are appended *after* parent fields in the generated `__init__`.
 
 ---
 
-## 11. Lab 10.1 — School System & Shape Hierarchy Architecture
+## 11. Lab 10.1 — School System & Shape Hierarchy Architecture (`§11.10`) `[Course: D10-14]`
 
-Lab 10.1 consolidates inheritance, `super()`, abstract bases, and polymorphism:
+Lab 10.1 combines Abstract Base Classes, inheritance chains, `super().__init__()`, and MRO inspection:
+
+```python
+# ORIGINAL CLASSROOM CODE [Course: D10-14: hierarchy.py]
+from abc import ABC, abstractmethod
+
+class Shape(ABC):
+    @abstractmethod
+    def area(self):
+        ...
+
+
+class Rectangle(Shape):
+    def __init__(self, w, h):
+        self.w, self.h = w, h
+
+    def area(self):
+        return self.w * self.h
+
+
+class Square(Rectangle):
+    def __init__(self, side):
+        super().__init__(side, side)          # reuses Rectangle constructor!
+
+
+print(Square(4).area())                       # -> 16
+print([c.__name__ for c in Square.__mro__])    # -> ['Square', 'Rectangle', 'Shape', 'ABC', 'object']
+```
 
 ```mermaid
 classDiagram
-    Person <|-- Student : IS-A
-    Person <|-- Teacher : IS-A
-    class Person {
-        +name: str
-        +email: str
-        +get_role() str
+    ABC <|-- Shape
+    Shape <|-- Rectangle
+    Rectangle <|-- Square
+    class Shape {
+        <<Abstract>>
+        +area()* float
     }
-    class Student {
-        +student_id: str
-        +courses: list
-        +enroll(course)
-        +get_role() str
+    class Rectangle {
+        +w: float
+        +h: float
+        +area() float
     }
-    class Teacher {
-        +employee_id: str
-        +salary: float
-        +get_role() str
+    class Square {
+        +__init__(side)
     }
 ```

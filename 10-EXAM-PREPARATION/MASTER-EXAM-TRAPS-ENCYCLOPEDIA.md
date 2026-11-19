@@ -22,7 +22,8 @@
 12. [Domain 11: Dictionaries, Sets & Hashability](#domain-11-dictionaries-sets--hashability)
 13. [Domain 12: Object-Oriented Programming, Encapsulation & Properties](#domain-12-object-oriented-programming--encapsulation)
 14. [Domain 13: Inheritance, MRO & Abstract Base Class Traps](#domain-13-inheritance-mro--abstract-base-class-traps)
-15. [The 60-Second "Trap Radar" Quick Reference](#the-60-second-trap-radar-quick-reference)
+15. [Domain 14: Polymorphism, Operator Overloading & Slots Traps](#domain-14-polymorphism-operator-overloading--slots-traps)
+16. [The 60-Second "Trap Radar" Quick Reference](#the-60-second-trap-radar-quick-reference)
 
 ---
 
@@ -877,6 +878,128 @@ c.radius = 10
 
 ---
 
+---
+
+# Domain 14: Polymorphism, Operator Overloading & Slots Traps
+
+### Trap 14.1 (Trap 43): Sequential `def` Replaces the Earlier Function (No Native Overloading) `[Course: D11-06]`
+- **The Code:**
+  ```python
+  def area(r):
+      return 3.14 * r * r
+
+  def area(w, h):
+      return w * h
+
+  print(area(5))
+  ```
+- **Intuitive Guess:** Python overloads `area()` by parameter count, computing circle area `78.5`.
+- **Actual Reality:** `TypeError: area() missing 1 required positional argument: 'h'`
+- **CPython Under the Hood:** Python evaluates `def` statements dynamically at runtime, binding a function object to the name `'area'` in the current namespace. The second `def` rebinds `'area'`, completely destroying the reference to the single-parameter version.
+- **Antidote:** Use default arguments `def area(a, b=None):` or `@functools.singledispatch`.
+
+---
+
+### Trap 14.2 (Trap 44): Reverse Operator Failure (`2 * v` Requires `__rmul__`) `[Course: D11-05]`
+- **The Code:**
+  ```python
+  class Vector:
+      def __init__(self, x, y):
+          self.x, self.y = x, y
+      def __mul__(self, k):
+          return Vector(self.x * k, self.y * k)
+
+  v = Vector(1, 2)
+  print(v * 2)   # Works! Vector(2, 4)
+  print(2 * v)   # Fails!
+  ```
+- **Intuitive Guess:** `2 * v` works identically to `v * 2` by commutativity.
+- **Actual Reality:** `TypeError: unsupported operand type(s) for *: 'int' and 'Vector'`
+- **CPython Under the Hood:** In `2 * v`, Python asks `int.__mul__(2, v)`. Since `int` does not know how to multiply a `Vector`, it returns `NotImplemented`. Python then looks for the reflected operator `v.__rmul__(2)`. If `__rmul__` is missing, Python raises `TypeError`.
+- **Antidote:** Always implement `__rmul__(self, k): return self * k`.
+
+---
+
+### Trap 14.3 (Trap 45): Undeclared Attribute Assignment on Slotted Instance `[Course: D11-07]`
+- **The Code:**
+  ```python
+  class Fixed:
+      __slots__ = ("x", "y")
+      def __init__(self, x, y):
+          self.x, self.y = x, y
+
+  f = Fixed(1, 2)
+  f.z = 10
+  ```
+- **Intuitive Guess:** Python dynamically adds attribute `'z'` to instance `f`.
+- **Actual Reality:** `AttributeError: 'Fixed' object has no attribute 'z'`
+- **CPython Under the Hood:** `__slots__` bypasses dictionary creation and allocates fixed descriptor offsets in the C struct. Any attribute not listed in `__slots__` is rejected at assignment time.
+- **Antidote:** Add any expected attributes to `__slots__`, or include `"__dict__"` in `__slots__` if dynamic expansion is required.
+
+---
+
+### Trap 14.4 (Trap 46): Slotted Classes Have No `__dict__` `[Course: D11-07]`
+- **The Code:**
+  ```python
+  class Point:
+      __slots__ = ("x", "y")
+      def __init__(self, x, y):
+          self.x, self.y = x, y
+
+  p = Point(3, 4)
+  print(vars(p))
+  ```
+- **Intuitive Guess:** Returns `{'x': 3, 'y': 4}`.
+- **Actual Reality:** `TypeError: vars() argument must have __dict__ attribute`
+- **CPython Under the Hood:** Slotted instances do not have a `__dict__` attribute (`hasattr(p, "__dict__") is False`). Functions relying on `__dict__` (such as `vars(obj)` or `json.dumps(obj.__dict__)`) will fail.
+- **Antidote:** Access attributes by name directly or define a custom helper method.
+
+---
+
+### Trap 14.5 (Trap 47): In-Place Mutation During Operator Overloading `[Course: D11-05]`
+- **The Code:**
+  ```python
+  class Counter:
+      def __init__(self, val):
+          self.val = val
+      def __add__(self, other):
+          self.val += other.val  # Mutates self in place!
+          return self
+
+  c1 = Counter(5)
+  c2 = Counter(10)
+  c3 = c1 + c2
+  print(c1.val, c3.val)
+  ```
+- **Intuitive Guess:** `c1.val` remains 5, `c3.val` is 15.
+- **Actual Reality:** `c1.val` is 15, and `c1 is c3`!
+- **CPython Under the Hood:** The binary addition operator `+` (`__add__`) is expected to leave operands intact and return a **new instance**. Mutating `self` inside `__add__` corrupts existing variables.
+- **Antidote:** Always instantiate and return a fresh object: `return Counter(self.val + other.val)`.
+
+---
+
+### Trap 14.6 (Trap 48): `@singledispatch` Dispatches ONLY on the First Argument `[Course: D11-06]`
+- **The Code:**
+  ```python
+  from functools import singledispatch
+
+  @singledispatch
+  def collide(a, b):
+      return "generic"
+
+  @collide.register
+  def _(a: int, b: str):
+      return "int and str"
+
+  print(collide(1, 2))
+  ```
+- **Intuitive Guess:** Prints `"generic"` because second argument `2` is not a `str`.
+- **Actual Reality:** Prints `"int and str"`!
+- **CPython Under the Hood:** `@singledispatch` inspects the type of **only the first positional argument** (`a`). It completely ignores any type annotations on `b`, `c`, or subsequent arguments.
+- **Antidote:** If multiple argument dispatch is needed, use nested type checks or specialized libraries (e.g. `multidispatch`).
+
+---
+
 # The 60-Second "Trap Radar" Quick Reference
 
 | Trap Pattern | Code Trigger | What You Think Happens | What Actually Happens | Why |
@@ -910,3 +1033,8 @@ c.radius = 10
 | **Abstract Base** | `ABC()` incomplete | Mock instance | `TypeError` | Unimplemented `@abstractmethod` |
 | **Subclass Private**| `Child.__x` vs `Parent.__x`| Overwrites parent | 2 distinct mangled names | `_Parent__x` and `_Child__x` |
 | **Dataclass Default**| `@dataclass field: list = []`| Independent list | `ValueError` | Dataclass prohibits direct mutable default |
+| **Function Shadow**| `def f(a): ...; def f(a,b):`| Overloaded function| Overwrites first `def` | Second `def` destroys first in namespace |
+| **Reflected Op** | `2 * v` (no `__rmul__`)| Commutative `v * 2` | `TypeError` | `int` does not know `Vector`; needs `__rmul__` |
+| **Slot Typo Block**| `fixed.z = 10` | Adds attribute | `AttributeError` | `__slots__` blocks unlisted attributes |
+| **Slot No Dict** | `vars(slotted_obj)` | Returns attributes | `TypeError` | Slotted objects do not have `__dict__` |
+| **Singledispatch** | `@singledispatch f(a, b)` | Dispatches on `a, b`| Dispatches ONLY on `a` | Ignores types of second and later args |
