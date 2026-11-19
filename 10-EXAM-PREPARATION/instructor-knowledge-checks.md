@@ -388,9 +388,58 @@
 
 ---
 
-## Day 9 Knowledge Check: OOP Classes & Encapsulation `[Course: D9-01 to D9-11]`
+## Day 9 Knowledge Check: OOP Classes & Encapsulation `[Course: D9-EXT-04]`
 
-### Question 9.1
+### Question 9.1 (Official Classroom Quiz)
+**In an instance method, what is `self`?**
+- A) The class name
+- B) A Python keyword
+- C) The return value
+- D) The current object
+- **Correct Answer:** **D** `[Course: D9-EXT-04]`
+- **Explanation:** In Python instance methods, `self` is the convention-defined first parameter that receives the reference to the current object instance upon which the method was called. It is not a reserved keyword (unlike `this` in Java/C++).
+
+### Question 9.2 (Official Classroom Quiz)
+**Which method does `print(obj)` use first?**
+- A) `__repr__`
+- B) `__init__`
+- C) `__str__`
+- D) `__format__`
+- **Correct Answer:** **C** `[Course: D9-EXT-04]`
+- **Explanation:** `print(obj)` and `str(obj)` directly query `obj.__str__()`. If the class does not define `__str__`, Python falls back to `obj.__repr__()`.
+
+### Question 9.3 (Official Classroom Quiz)
+**An attribute `self.__secret` in class `Vault` is stored as:**
+- A) `__secret`
+- B) `secret`
+- C) `__Vault_secret`
+- D) `_Vault__secret`
+- **Correct Answer:** **D** `[Course: D9-EXT-04]`
+- **Explanation:** In Python, any attribute prefixed with two or more leading underscores (and at most one trailing underscore) is privately name-mangled to `_<ClassName>__<attrName>`. In class `Vault`, `__secret` is stored as `_Vault__secret`.
+
+### Question 9.4 (Official Classroom Quiz)
+**Without `__eq__`, what does `a == b` compare for two objects?**
+- A) Identity (`is`)
+- B) Their `__dict__`
+- C) Their types
+- D) Memory size
+- **Correct Answer:** **A** `[Course: D9-EXT-04]`
+- **Explanation:** The default `__eq__` inherited from `object` compares identity: `a is b` (evaluating whether `id(a) == id(b)`). Without implementing a custom `__eq__`, two separate instances with identical attributes will compare as `False`.
+
+### Question 9.5 (Official Classroom Quiz)
+**A `@property` with no setter makes the attribute:**
+- A) Static
+- B) Read-only
+- C) Private
+- D) Inherited
+- **Correct Answer:** **B** `[Course: D9-EXT-04]`
+- **Explanation:** In Python's descriptor protocol, defining a property getter via `@property` without defining an accompanying `@name.setter` creates a read-only attribute; attempting to assign to it raises `AttributeError`.
+
+---
+
+## Day 9 Supplementary Practice Questions `[Course: D9-01 to D9-11]`
+
+### Question 9.6
 **What happens when `a.species = "wolf"` is executed on an instance `a` of class `Dog` where `Dog.species = "Canis familiaris"`?**
 - A) `Dog.species` is changed to `"wolf"` for all dogs.
 - B) An instance attribute `species` is created on `a`; `Dog.species` remains `"Canis familiaris"`.
@@ -399,7 +448,7 @@
 - **Correct Answer:** **B** `[Course: D9-08]`
 - **Explanation:** Attribute assignment through an instance (`a.attr = val`) writes directly to that instance's namespace (`a.__dict__`). It shadows the class attribute for instance `a` while leaving the class-level attribute `Dog.species` unchanged.
 
-### Question 9.2
+### Question 9.7
 **Given class `class Clicker: def ping(): return 1`, what occurs when calling `c = Clicker(); c.ping()`?**
 - A) Returns `1`.
 - B) Raises `TypeError: Clicker.ping() takes 0 positional arguments but 1 was given`.
@@ -408,7 +457,7 @@
 - **Correct Answer:** **B** `[Course: D9-09]`
 - **Explanation:** Calling `c.ping()` passes instance `c` as the first argument automatically. Because `ping` was defined without the `self` parameter, Python raises `TypeError`.
 
-### Question 9.3
+### Question 9.8
 **In the class below, why do all instances share the same `tricks` list?**
 ```python
 class Dog:
@@ -423,21 +472,75 @@ class Dog:
 - **Correct Answer:** **B** `[Course: D9-08]`
 - **Explanation:** Any mutable object declared in the class body belongs to the class namespace and is shared among all instances. To give each object its own list, it must be initialized on `self` inside `__init__`: `self.tricks = []`.
 
-### Question 9.4
-**Which dunder method provides an unambiguous, developer-facing representation of an object (typically used in the REPL)?**
-- A) `__str__`
-- B) `__len__`
-- C) `__repr__`
-- D) `__name__`
-- **Correct Answer:** **C** `[Course: D9-07]`
-- **Explanation:** `__repr__` is intended for developers and debugging (unambiguous, ideally executable code). `__str__` is intended for readable user-facing output (`print()`).
+---
 
-### Question 9.5
-**In Python, how is an attribute defined as `self.__balance` internally stored by the compiler to prevent accidental overrides?**
-- A) It is stored in a hidden hardware register.
-- B) It is name-mangled to `_ClassName__balance`.
-- C) It is encrypted with AES-256 in memory.
-- D) It is discarded when `__init__` completes.
-- **Correct Answer:** **B** `[Course: D9-06, D9-11]`
-- **Explanation:** Any identifier with two or more leading underscores (and at most one trailing underscore) undergoes private name mangling, being rewritten internally as `_ClassName__attributeName`.
+## Day 10 Knowledge Check: OOP Inheritance & the MRO `[Course: D10-01 to D10-07]`
+
+### Question 10.1
+**What happens if a child class defines its own `__init__()` method but does not call `super().__init__()`?**
+- A) Python automatically calls the parent's `__init__()` in the background.
+- B) The parent's attributes are never initialized on the child instance, causing `AttributeError` when accessed.
+- C) Python raises a compilation `SyntaxError`.
+- D) The child class cannot be instantiated.
+- **Correct Answer:** **B** `[Course: D10-05]`
+- **Explanation:** Python does not automatically invoke a base class `__init__()` when overridden by a derived class. If `super().__init__()` is omitted, the parent's initialization code never runs, and any attributes expected from the parent will be missing.
+
+### Question 10.2
+**Given the following diamond hierarchy, what is the output of `D().ping()`?**
+```python
+class A:
+    def ping(self): return "A"
+class B(A):
+    def ping(self): return "B"
+class C(A):
+    def ping(self): return "C"
+class D(B, C):
+    pass
+```
+- A) `"A"`
+- B) `"B"`
+- C) `"C"`
+- D) Raises `TypeError: Ambiguous MRO`
+- **Correct Answer:** **B** `[Course: D10-04, D10-06]`
+- **Explanation:** Python resolves multiple inheritance using the C3 Linearization algorithm. The Method Resolution Order for `D` is `[D, B, C, A, object]`. Since `B` appears before `C`, `B.ping()` is chosen first and returns `"B"`.
+
+### Question 10.3
+**What does `isinstance(True, int)` evaluate to in Python, and why?**
+- A) `False`, because booleans and integers are distinct primitive types.
+- B) `True`, because `bool` is a built-in subclass of `int`.
+- C) Raises `TypeError`.
+- D) `True`, only if explicit casting `int(True)` was performed.
+- **Correct Answer:** **B** `[Course: D10-07]`
+- **Explanation:** In Python, `bool` inherits from `int` (`issubclass(bool, int) is True`). Therefore, `isinstance(True, int)` is `True`. Note that `type(True) is int` evaluates to `False` because `type()` checks exact class identity.
+
+### Question 10.4
+**What occurs when attempting to instantiate an Abstract Base Class that has unimplemented abstract methods?**
+```python
+from abc import ABC, abstractmethod
+class Base(ABC):
+    @abstractmethod
+    def run(self): pass
+b = Base()
+```
+- A) Instantiation succeeds, but calling `b.run()` raises `NotImplementedError`.
+- B) Raises `TypeError: Can't instantiate abstract class Base without an implementation for abstract method 'run'`.
+- C) Returns a mock proxy object.
+- D) Compiles to `None`.
+- **Correct Answer:** **B** `[Course: D10-02, Manual §11.6]`
+- **Explanation:** Python's `ABCMeta` metaclass prevents instantiation of any class with unimplemented `@abstractmethod`s by raising a `TypeError` at construction time.
+
+### Question 10.5
+**In Python 3.7+, what happens if you declare a mutable default in a `@dataclass` as follows?**
+```python
+from dataclasses import dataclass
+@dataclass
+class Group:
+    members: list = []
+```
+- A) Every instance of `Group` gets an independent empty list.
+- B) Raises `ValueError: mutable default <class 'list'> for field members is not allowed: use default_factory`.
+- C) Silently converts the list to an immutable tuple.
+- D) Syntax error at line 3.
+- **Correct Answer:** **B** `[Course: D10-02, Manual §11.9]`
+- **Explanation:** The `@dataclass` decorator explicitly inspects default field values. To protect developers from the classic shared mutable default argument bug, it raises a `ValueError` if a mutable default like `[]` or `{}` is passed directly, requiring `field(default_factory=list)`.
 

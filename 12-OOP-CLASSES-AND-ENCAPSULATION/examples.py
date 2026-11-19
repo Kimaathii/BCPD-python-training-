@@ -184,6 +184,105 @@ def test_property_decorator():
         pass
 
 
+def test_lifecycle_and_dynamic_attributes():
+    """Verifies lifecycle.py dynamic attributes, introspection, and destructor [Course: D9-EXT-02]."""
+    class Employee:
+        pass
+
+    e = Employee()
+    # Dynamic attributes (any object can grow them)
+    e.colour = "red"
+    setattr(e, "size", 3)
+    assert getattr(e, "colour") == "red"
+    assert hasattr(e, "size") is True
+    assert hasattr(e, "salary") is False
+    delattr(e, "colour")
+    assert hasattr(e, "colour") is False
+
+    # Introspection
+    assert vars(e) == {"size": 3}
+    assert e.__dict__ == {"size": 3}
+    assert Employee.__name__ == "Employee"
+    assert Employee.__doc__ is None
+    assert e.__class__ is Employee
+
+    # Destructor __del__
+    cleanup_log = []
+    class TempFile:
+        def __init__(self, tag):
+            self.tag = tag
+        def __del__(self):
+            cleanup_log.append(f"cleanup {self.tag}!")
+
+    t = TempFile("alpha")
+    del t
+    assert cleanup_log == ["cleanup alpha!"]
+
+
+def test_bank_account_lab_9_1():
+    """Verifies bank.py Lab 9.1 BankAccount with transfer and formatting [Course: D9-EXT-03]."""
+    class BankAccount:
+        def __init__(self, owner: str, initial_balance: float = 0.0):
+            self.owner = owner
+            if initial_balance < 0:
+                raise ValueError("Initial balance cannot be negative")
+            self.__balance = float(initial_balance)
+
+        @property
+        def balance(self) -> float:
+            return self.__balance
+
+        def deposit(self, amount: float) -> float:
+            if amount <= 0:
+                raise ValueError("Deposit amount must be positive")
+            self.__balance += amount
+            return self.__balance
+
+        def withdraw(self, amount: float) -> float:
+            if amount <= 0:
+                raise ValueError("Withdrawal amount must be positive")
+            if amount > self.__balance:
+                raise ValueError("Insufficient funds")
+            self.__balance -= amount
+            return self.__balance
+
+        def transfer(self, target: "BankAccount", amount: float) -> None:
+            self.withdraw(amount)
+            target.deposit(amount)
+
+        def __str__(self) -> str:
+            return f"{self.owner}: {self.__balance:.2f}"
+
+    b1 = BankAccount("Ada", 100.0)
+    b2 = BankAccount("Charles", 50.0)
+
+    assert str(b1) == "Ada: 100.00"
+    assert b1.balance == 100.0
+    b1.deposit(50.0)
+    assert b1.balance == 150.0
+    b1.withdraw(20.0)
+    assert b1.balance == 130.0
+
+    # Test transfer
+    b1.transfer(b2, 30.0)
+    assert b1.balance == 100.0
+    assert b2.balance == 80.0
+
+    # Overdraft protection
+    try:
+        b1.withdraw(500.0)
+        assert False, "Should raise ValueError on overdraft"
+    except ValueError:
+        pass
+
+    # Read-only property
+    try:
+        b1.balance = 999.0  # type: ignore
+        assert False, "Should raise AttributeError on read-only property"
+    except AttributeError:
+        pass
+
+
 def main():
     print("Running Module 12: OOP Classes & Encapsulation test suite...")
     test_day9_title_script()
@@ -194,6 +293,8 @@ def main():
     test_dunder_methods()
     test_encapsulation_and_mangling()
     test_property_decorator()
+    test_lifecycle_and_dynamic_attributes()
+    test_bank_account_lab_9_1()
     print("All Module 12 examples PASSED cleanly (100% verified against Day 9 slides).")
 
 

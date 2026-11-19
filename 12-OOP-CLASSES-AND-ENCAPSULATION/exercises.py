@@ -12,29 +12,37 @@ from typing import List, Optional, Tuple
 # ==============================================================================
 class Student:
     """
-    Represents a student with a name and a list of numeric test scores.
+    Represents a student designed according to UML specification [Course: D9-EXT-01].
+    Attributes:
+        - name: str
+        - grades: list[int]
     Methods:
-        add_score(score: float): appends score; raises ValueError if score < 0 or score > 100.
-        average(): returns the arithmetic mean of scores rounded to 1 decimal place, or 0.0 if empty.
+        + add_grade(g: int) -> None (validates 0 <= g <= 100)
+        + gpa() -> float (average rounded to 1 decimal place, or 0.0 if empty)
     Dunder:
-        __str__(): returns "Student(name=<name>, avg=<average>)"
+        __str__(): returns "Student(name=<name>, gpa=<gpa>)"
     """
     def __init__(self, name: str):
         self.name = name
-        self.scores: List[float] = []
+        self.grades: List[int] = []
 
-    def add_score(self, score: float) -> None:
-        if not (0 <= score <= 100):
-            raise ValueError("Score must be between 0 and 100")
-        self.scores.append(float(score))
+    def add_grade(self, g: int) -> None:
+        if not (0 <= g <= 100):
+            raise ValueError("Grade must be between 0 and 100")
+        self.grades.append(int(g))
 
-    def average(self) -> float:
-        if not self.scores:
+    # Backward compatibility alias
+    add_score = add_grade
+
+    def gpa(self) -> float:
+        if not self.grades:
             return 0.0
-        return round(sum(self.scores) / len(self.scores), 1)
+        return round(sum(self.grades) / len(self.grades), 1)
+
+    average = gpa
 
     def __str__(self) -> str:
-        return f"Student(name={self.name}, avg={self.average()})"
+        return f"Student(name={self.name}, avg={self.gpa()})"
 
 
 # ==============================================================================
@@ -158,8 +166,16 @@ class BankAccount:
         self.__transactions.append(("WITHDRAW", float(amount)))
         return self.__balance
 
+    def transfer(self, target: "BankAccount", amount: float) -> None:
+        """Transfers amount from self to target account [Course: D9-EXT-03]."""
+        self.withdraw(amount)
+        target.deposit(amount)
+
     def statement(self) -> List[Tuple[str, float]]:
         return list(self.__transactions)
+
+    def __str__(self) -> str:
+        return f"{self.owner}: {self.__balance:.2f}"
 
 
 # ==============================================================================
@@ -190,12 +206,19 @@ def test_exercises():
     acct = BankAccount("Ada", 100.0)
     assert acct.owner == "Ada"
     assert acct.balance == 100.0
+    assert str(acct) == "Ada: 100.00"
     acct.deposit(50.0)
     assert acct.balance == 150.0
     acct.withdraw(20.0)
     assert acct.balance == 130.0
+
+    target = BankAccount("Bob", 20.0)
+    acct.transfer(target, 30.0)
+    assert acct.balance == 100.0
+    assert target.balance == 50.0
+
     stmt = acct.statement()
-    assert len(stmt) == 3
+    assert len(stmt) == 4
 
     # Ensure balance cannot be directly overwritten
     try:

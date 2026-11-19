@@ -121,8 +121,15 @@ class BankAccountSolution:
         self.__transactions.append(("WITHDRAW", float(amount)))
         return self.__balance
 
+    def transfer(self, target: "BankAccountSolution", amount: float) -> None:
+        self.withdraw(amount)
+        target.deposit(amount)
+
     def statement(self) -> List[Tuple[str, float]]:
         return list(self.__transactions)
+
+    def __str__(self) -> str:
+        return f"{self.owner}: {self.__balance:.2f}"
 
 
 def main():
@@ -139,6 +146,11 @@ def main():
     acc = BankAccountSolution("Bo", 50)
     acc.deposit(25)
     assert acc.balance == 75.0
+    assert str(acc) == "Bo: 75.00"
+    acc2 = BankAccountSolution("Ada", 10)
+    acc.transfer(acc2, 25)
+    assert acc.balance == 50.0
+    assert acc2.balance == 35.0
     print("Module 12 solutions self-test PASSED.")
 
 

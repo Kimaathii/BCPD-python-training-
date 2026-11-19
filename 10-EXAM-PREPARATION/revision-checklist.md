@@ -113,6 +113,8 @@
 
 ## 11. Object-Oriented Programming & Encapsulation `[Module 12]`
 - [ ] Differentiate between Class (blueprint) and Object (instance). `[D9-04]`
+- [ ] Read and draw UML class diagrams: PascalCase class name, `-` private attributes/methods, `+` public methods. `[D9-EXT-01]`
+- [ ] Follow 4-step class design workflow: 1. Name class, 2. List attributes (`-`), 3. List methods (`+`), 4. Code & test (`__init__` first). `[D9-EXT-01]`
 - [ ] Write PascalCase class definitions with `__init__` constructors. `[D9-05]`
 - [ ] Understand the explicit `self` parameter and how `obj.method()` translates to `Class.method(obj)`. `[D9-05, D9-09]`
 - [ ] Recognize that omitting `self` in an instance method signature raises `TypeError` when called on an instance. `[D9-09]`
@@ -124,4 +126,26 @@
 - [ ] Distinguish protected attributes (`_x` convention) from private name-mangled attributes (`__x` becomes `_ClassName__x`). `[D9-06, D9-11]`
 - [ ] Know that `__balance` raises `AttributeError` on direct external access, but `_Account__balance` accesses the attribute. `[D9-06, D9-11]`
 - [ ] Use `@property` to create getter methods, `@<name>.setter` for data validation, and recognize read-only property `AttributeError` on write. `[D9-10]`
+- [ ] Use dynamic attribute functions: `setattr()`, `getattr()`, `hasattr()`, `delattr()`, and `vars(obj)`. `[D9-EXT-02]`
+- [ ] Explain the object lifecycle and destructor `__del__(self)`: runs when reference count drops to 0; `del obj` removes the variable name, not necessarily the object immediately. `[D9-EXT-02]`
+- [ ] Build Lab 9.1 `BankAccount` with owner, private balance property, validation, and inter-account transfers. `[D9-EXT-03]`
+
+---
+
+## 12. OOP Inheritance & the MRO `[Module 13]`
+- [ ] Understand class inheritance syntax: `class Dog(Animal):` for true IS-A relationships. `[D10-01, D10-03]`
+- [ ] Know that all Python classes implicitly inherit from `object`. `[D10-03]`
+- [ ] Categorize the 5 types of inheritance: Single, Multilevel, Hierarchical, Multiple, and Hybrid (Diamond). `[D10-04]`
+- [ ] Inspect inheritance hierarchies using `cls.__mro__`, `cls.mro()`, `cls.__bases__`, and `issubclass()`. `[D10-04, D10-07]`
+- [ ] Always call `super().__init__(*args)` in child initializers to avoid `AttributeError` on uninitialized parent fields. `[D10-05]`
+- [ ] Extend parent method logic using `super().method(...)` rather than copying code. `[D10-05]`
+- [ ] Implement method overriding and the Shared Template Pattern (where a base method like `__str__` calls `self.area()` polymorphically). `[D10-06]`
+- [ ] Distinguish `isinstance(obj, Class)` (checks entire inheritance chain) from `type(obj) is Class` (exact match only). `[D10-07]`
+- [ ] Explain why `isinstance(True, int)` is `True` while `type(True) is int` is `False`. `[D10-07]`
+- [ ] Explain the C3 Linearization algorithm and how Python deterministically resolves the Diamond problem. `[D10-04]`
+- [ ] Understand that private attributes (`__attr`) are independently mangled per class (`_Parent__attr` vs `_Child__attr`) and cannot be accidentally overridden by subclasses. `[D10-05]`
+- [ ] Define abstract interfaces using `abc.ABC` and `@abstractmethod`, and recognize `TypeError` when an incomplete subclass is instantiated. `[D10-02]`
+- [ ] Apply Mixin classes for reusable capability without identity or persistent instance state. `[D10-02]`
+- [ ] Implement `@dataclass` for clean data containers with automatic `__init__`, `__repr__`, `__eq__`, and `frozen=True` immutability. `[D10-02]`
+- [ ] Avoid the dataclass mutable default error by using `field(default_factory=list)`. `[D10-02]`
 

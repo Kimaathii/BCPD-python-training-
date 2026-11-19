@@ -692,3 +692,112 @@ Which expression successfully reads the balance from outside the class?
 - **Correct Answer: C** `[Course: D9-06, D9-11]`
 - **Analysis:** Identifiers with two leading underscores (`__x`) are name-mangled by the Python compiler to `_ClassName__x`. Direct access via `acc.__balance` raises `AttributeError`, but `acc._Account__balance` accesses the attribute directly.
 
+---
+
+## Part 10: OOP Inheritance, MRO & Abstract Base Class Traps (Day 10)
+
+### Question T-43: The Skipped `super().__init__()` Disaster
+What is the output of executing:
+```python
+class Vehicle:
+    def __init__(self, make):
+        self.make = make
+
+class Car(Vehicle):
+    def __init__(self, make, model):
+        self.model = model
+
+c = Car("Toyota", "Corolla")
+print(c.make)
+```
+- A) `Toyota`
+- B) `None`
+- C) `AttributeError: 'Car' object has no attribute 'make'`
+- D) `TypeError`
+- **Correct Answer: C** `[Course: D10-05]`
+- **Analysis:** When a subclass overrides `__init__`, it completely supersedes the parent constructor unless `super().__init__()` is explicitly called. Because `Car.__init__` omitted `super().__init__(make)`, `self.make` was never created on the instance.
+
+---
+
+### Question T-44: Diamond Inheritance Resolution
+Given:
+```python
+class Top:
+    def msg(self): return "Top"
+class Left(Top):
+    def msg(self): return "Left"
+class Right(Top):
+    def msg(self): return "Right"
+class Bottom(Left, Right):
+    pass
+
+b = Bottom()
+print(b.msg())
+```
+- A) `Left`
+- B) `Right`
+- C) `Top`
+- D) `TypeError: ambiguous inheritance`
+- **Correct Answer: A** `[Course: D10-04, D10-06]`
+- **Analysis:** Python's C3 Linearization MRO search order for `Bottom` is `[Bottom, Left, Right, Top, object]`. Since `Left` appears before `Right` in `(Left, Right)`, `Left.msg()` is resolved and returns `"Left"`.
+
+---
+
+### Question T-45: Subclassing and the `isinstance` vs `type` Dichotomy
+What is printed by:
+```python
+class Animal: pass
+class Dog(Animal): pass
+
+d = Dog()
+print(isinstance(d, Animal), type(d) is Animal)
+```
+- A) `True True`
+- B) `True False`
+- C) `False False`
+- D) `False True`
+- **Correct Answer: B** `[Course: D10-07]`
+- **Analysis:** `isinstance(d, Animal)` checks whether `d` is an instance of `Animal` or any derived subclass (`Dog` is a subclass of `Animal`, so `True`). However, `type(d)` returns the exact class `<class '__main__.Dog'>`, which is not identical to `<class '__main__.Animal'>`, resulting in `False`.
+
+---
+
+### Question T-46: Unimplemented Abstract Methods
+What happens when running:
+```python
+from abc import ABC, abstractmethod
+
+class BaseProcessor(ABC):
+    @abstractmethod
+    def process(self): pass
+
+class CustomProcessor(BaseProcessor):
+    def run(self): return "running"
+
+p = CustomProcessor()
+```
+- A) `p` is instantiated successfully.
+- B) `TypeError: Can't instantiate abstract class CustomProcessor without an implementation for abstract method 'process'`
+- C) `CustomProcessor` automatically implements `process` as a no-op.
+- D) SyntaxError at line 7.
+- **Correct Answer: B** `[Course: D10-02, Manual §11.6]`
+- **Analysis:** Any subclass inheriting from an `ABC` that contains unimplemented `@abstractmethod`s cannot be instantiated; CPython's `ABCMeta` raises a `TypeError` at construction time.
+
+---
+
+### Question T-47: Dataclass Mutable Default Direct Assignment
+What occurs when declaring the following dataclass?
+```python
+from dataclasses import dataclass
+
+@dataclass
+class Inventory:
+    items: list = []
+```
+- A) Each `Inventory` instance gets an independent empty list.
+- B) All `Inventory` instances share the same class-level list.
+- C) Raises `ValueError: mutable default <class 'list'> for field items is not allowed: use default_factory`
+- D) Raises `TypeError`
+- **Correct Answer: C** `[Course: D10-02, Manual §11.9]`
+- **Analysis:** The standard `@dataclass` decorator actively prohibits mutable default argument values (like `[]` or `{}`) to prevent shared mutation bugs, raising `ValueError`. The required pattern is `items: list = field(default_factory=list)`.
+
+

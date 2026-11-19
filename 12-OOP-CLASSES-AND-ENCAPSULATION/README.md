@@ -2,8 +2,8 @@
 
 > **BCPD Python Certification — Domain 3: Object-Oriented Programming (15%)**  
 > **Student Manual Reference:** Day 10 (§10.1–10.10)  
-> **Classroom Source Slides:** `D9-01` to `D9-11` (Week 2 • Day 9: Tuesday 17 Nov 2026)  
-> **Core Theme:** *Model real things as classes with their own data, behaviour, and protected internals.*
+> **Classroom Source Slides:** `D9-01` to `D9-11`, `D9-EXT-01` to `D9-EXT-04` (Week 2 • Day 9: Tuesday 17 Nov 2026)  
+> **Core Theme:** *Model real things as classes with their own data, behaviour, protected internals, and lifecycle management.*
 
 ---
 
@@ -31,6 +31,37 @@ classDiagram
 2. **Object**: A concrete instance built from a class, holding its own independent attribute values in memory.
 3. **Encapsulation**: Bundling data together with the functions that operate on that data, while restricting direct access to internal implementation details.
 4. **Roadmap**: Inheritance (subclassing) and Polymorphism (common interfaces) build directly on class fundamentals.
+
+---
+
+## 1.1 Designing a Class: UML Basics (`Beyond the Manual`) `[Course: D9-EXT-01]`
+
+Before writing code, professional software engineers design classes using **Unified Modeling Language (UML)** class diagrams.
+
+### UML Class Box Anatomy
+A UML class diagram represents a class as a three-compartment box:
+
+```mermaid
+classDiagram
+    class Student {
+        -name: str
+        -grades: list[int]
+        +add_grade(g: int) None
+        +gpa() float
+    }
+```
+
+| Compartment | Purpose | UML Visibility Notation | Example |
+|---|---|---|---|
+| **Top** | Class Name | PascalCase | `Student` |
+| **Middle** | Attributes (State / What it knows) | `-` Private<br>`+` Public | `- name: str`<br>`- grades: list[int]` |
+| **Bottom** | Methods (Behavior / What it does) | `+` Public<br>`-` Private | `+ add_grade(g: int) -> None`<br>`+ gpa() -> float` |
+
+### The 4-Step Class Design Workflow:
+1. **Name the class**: Use a singular noun in **PascalCase** (e.g. `Student`, `BankAccount`).
+2. **List what it knows / holds**: Identify attributes; start with private (`-`) to enforce encapsulation.
+3. **List what it can do**: Identify methods; make them public (`+`) so external code can interact cleanly.
+4. **Write code & test**: Always implement `__init__` first to establish initial state before implementing business methods.
 
 ---
 
@@ -270,35 +301,41 @@ print(t.celsius, t.fahrenheit)        # -> 30 86.0
 
 ---
 
-## 8. Lab 9.1 — Full BankAccount Class Architecture
+## 8. Lab 9.1 — Full BankAccount Class (`§10.9`) `[Course: D9-EXT-03]`
 
-Putting together everything from Day 9 into an enterprise-ready model:
-- `owner`: public or protected with getter.
-- `balance`: private, guarded by `@property` and validation methods.
-- Methods: `deposit`, `withdraw`, `transfer_to`.
-- Dunders: `__repr__`, `__str__`, `__eq__`.
+Classroom laboratory assignment from `bank.py`: Build an enterprise `BankAccount` class implementing encapsulation, validation, dunder methods, and inter-account transfers.
+
+### Specifications:
+- `owner`: str (set at `__init__`).
+- `__balance`: float, defaults to 0.0, strictly private.
+- `@property balance`: read-only property returning `__balance` (no setter).
+- `deposit(amount)`: validates that `amount > 0`; raises `ValueError("Deposit amount must be positive")` if non-positive.
+- `withdraw(amount)`: validates that `amount > 0` and `amount <= __balance`; raises `ValueError` on negative amounts or overdrafts.
+- `__str__()`: returns `f"{self.owner}: {self.__balance:.2f}"`.
+- `transfer(target_account, amount)`: withdraws `amount` from `self` and deposits into `target_account`.
 
 ```python
+# ORIGINAL CLASSROOM IMPLEMENTATION [Course: D9-EXT-03]
 class BankAccount:
-    """Enterprise Bank Account with full encapsulation and validation."""
-    _interest_rate = 0.03  # Class attribute
+    """Enterprise Bank Account conforming to Lab 9.1 specification."""
 
     def __init__(self, owner: str, initial_balance: float = 0.0):
+        self.owner = owner
         if initial_balance < 0:
             raise ValueError("Initial balance cannot be negative")
-        self.owner = owner
         self.__balance = float(initial_balance)
-        self.__transactions = []
+        self.__transactions = [("OPEN", float(initial_balance))]
 
     @property
     def balance(self) -> float:
+        """Read-only property. Accessing acct.balance returns __balance."""
         return self.__balance
 
     def deposit(self, amount: float) -> float:
         if amount <= 0:
             raise ValueError("Deposit amount must be positive")
         self.__balance += amount
-        self.__transactions.append(("DEPOSIT", amount))
+        self.__transactions.append(("DEPOSIT", float(amount)))
         return self.__balance
 
     def withdraw(self, amount: float) -> float:
@@ -307,17 +344,91 @@ class BankAccount:
         if amount > self.__balance:
             raise ValueError("Insufficient funds")
         self.__balance -= amount
-        self.__transactions.append(("WITHDRAW", amount))
+        self.__transactions.append(("WITHDRAW", float(amount)))
         return self.__balance
+
+    def transfer(self, target: "BankAccount", amount: float) -> None:
+        """Atomically transfers money from this account to target account."""
+        self.withdraw(amount)
+        target.deposit(amount)
+
+    def statement(self) -> list[tuple[str, float]]:
+        return list(self.__transactions)
 
     def __repr__(self) -> str:
         return f"BankAccount(owner={self.owner!r}, balance={self.__balance})"
 
     def __str__(self) -> str:
-        return f"Account[{self.owner}]: ${self.__balance:,.2f}"
+        return f"{self.owner}: {self.__balance:.2f}"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, BankAccount):
             return NotImplemented
         return self.owner == other.owner and self.__balance == other.__balance
 ```
+
+---
+
+## 9. Object Lifecycle & Dynamic Attributes (`Beyond the Manual`) `[Course: D9-EXT-02]`
+
+Python's object model is fundamentally dynamic: objects are backed by dictionaries, attributes can be added or removed at runtime, and destruction is governed by deterministic reference counting.
+
+```mermaid
+flowchart LR
+    A["Variable Name 't'"] -->|"ref count = 1"| B["Heap Object (TempFile)"]
+    C["del t"] -->|"unbonds 't'"| D{"Ref count == 0?"}
+    D -->|Yes| E["Execute __del__(self) & Free Memory"]
+    D -->|No (other refs exist)| F["Object Stays Alive in Heap"]
+```
+
+### 9.1 Dynamic Attributes & Attribute Functions
+By default, Python class instances have an internal namespace dictionary accessed via `__dict__` or `vars(obj)`. Attributes can be created or queried dynamically:
+
+```python
+# ORIGINAL CLASSROOM CODE [Course: D9-EXT-02: lifecycle.py]
+class Employee:
+    pass
+
+e = Employee()
+# Dynamic attributes (any object can grow them)
+e.colour = "red"
+setattr(e, "size", 3)
+print(getattr(e, "colour"))      # -> red
+print(hasattr(e, "salary"))      # -> False
+delattr(e, "colour")
+
+# Introspection
+print(vars(e))                   # -> {'size': 3}
+print(e.__dict__)                # -> {'size': 3}
+print(Employee.__name__)         # -> Employee
+print(Employee.__doc__)          # -> None
+print(e.__class__)               # -> <class '__main__.Employee'>
+```
+
+| Built-in Function | Equivalent Dot Syntax | Behavior |
+|---|---|---|
+| `setattr(obj, 'x', val)` | `obj.x = val` | Creates or updates attribute `'x'` |
+| `getattr(obj, 'x', default)` | `obj.x` | Returns value; returns `default` if attribute absent (or raises `AttributeError` if omitted) |
+| `hasattr(obj, 'x')` | `'x' in obj.__dict__` | Returns `True` if attribute exists on object or its class |
+| `delattr(obj, 'x')` | `del obj.x` | Deletes attribute from instance namespace |
+| `vars(obj)` | `obj.__dict__` | Returns dictionary storing instance attributes |
+
+### 9.2 The Object Destructor: `__del__(self)`
+The special method `__del__(self)` is called the **destructor** (or finalizer). It is called when an instance is about to be destroyed:
+- Python uses **reference counting**: each object tracks how many references point to it.
+- When an object's reference count drops to **0**, CPython immediately deallocates it and invokes `__del__(self)`.
+- **CRITICAL EXAM DISTINCTION**:
+  `del obj` does **NOT** directly call `__del__()`! `del obj` only deletes the name `obj` from the local scope and decrements the target object's reference counter by 1. If another variable still references that object, `__del__()` will NOT run until that final reference is released.
+
+```python
+class TempFile:
+    def __init__(self, filename: str):
+        self.filename = filename
+
+    def __del__(self):
+        print(f"cleanup! Deleted {self.filename}")
+
+t = TempFile("data.tmp")
+del t  # Ref count hits 0 -> prints "cleanup! Deleted data.tmp"
+```
+

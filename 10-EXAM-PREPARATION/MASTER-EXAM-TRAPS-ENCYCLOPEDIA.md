@@ -21,7 +21,8 @@
 11. [Domain 10: Tuples, Records & Collections (Counter & defaultdict)](#domain-10-tuples-records--collections)
 12. [Domain 11: Dictionaries, Sets & Hashability](#domain-11-dictionaries-sets--hashability)
 13. [Domain 12: Object-Oriented Programming, Encapsulation & Properties](#domain-12-object-oriented-programming--encapsulation)
-14. [The 60-Second "Trap Radar" Quick Reference](#the-60-second-trap-radar-quick-reference)
+14. [Domain 13: Inheritance, MRO & Abstract Base Class Traps](#domain-13-inheritance-mro--abstract-base-class-traps)
+15. [The 60-Second "Trap Radar" Quick Reference](#the-60-second-trap-radar-quick-reference)
 
 ---
 
@@ -749,6 +750,133 @@ c.radius = 10
 
 ---
 
+# Domain 13: Inheritance, MRO & Abstract Base Class Traps
+
+### Trap 13.1 (Trap 37): Omitting `super().__init__()` Leaves Parent Attributes Uninitialized `[Course: D10-05]`
+- **The Code:**
+  ```python
+  class Base:
+      def __init__(self, name):
+          self.name = name
+
+  class Child(Base):
+      def __init__(self, name, age):
+          # Forgot super().__init__(name)!
+          self.age = age
+
+  c = Child("Ada", 25)
+  print(c.name)
+  ```
+- **Intuitive Guess:** Python automatically calls `Base.__init__`, printing `"Ada"`.
+- **Actual Reality:** `AttributeError: 'Child' object has no attribute 'name'`
+- **CPython Under the Hood:** Unlike Java or C++, CPython does **not** automatically chain constructor calls in derived classes. If the child overrides `__init__`, the parent's `__init__` will only execute if called explicitly via `super().__init__(...)`.
+- **Antidote:** Always invoke `super().__init__(*args, **kwargs)` at the start of child initializers.
+
+---
+
+### Trap 13.2 (Trap 38): The Diamond Problem & C3 Linearization Order `[Course: D10-04, D10-06]`
+- **The Code:**
+  ```python
+  class A:
+      def who(self): return "A"
+  class B(A):
+      def who(self): return "B"
+  class C(A):
+      def who(self): return "C"
+  class D(B, C):
+      pass
+
+  print(D().who())
+  ```
+- **Intuitive Guess:** Ambiguous method call error, or `"A"` because `A` is the common grandparent.
+- **Actual Reality:** Prints `"B"`.
+- **CPython Under the Hood:** Python calculates the Method Resolution Order using C3 Linearization. For `class D(B, C)`, the search order is `D -> B -> C -> A -> object`. Since `B` is declared first in `(B, C)`, `B.who()` is resolved first.
+- **Antidote:** Inspect the exact MRO via `Class.mro()` or `Class.__mro__`.
+
+---
+
+### Trap 13.3 (Trap 39): `isinstance(True, int)` is True vs. `type(True) is int` is False `[Course: D10-07]`
+- **The Code:**
+  ```python
+  print(isinstance(True, int))
+  print(type(True) is int)
+  ```
+- **Intuitive Guess:** `False` and `False` because booleans and integers are different data types.
+- **Actual Reality:**
+  ```python
+  True
+  False
+  ```
+- **CPython Under the Hood:** In Python, `bool` is an explicit subclass of `int` (`issubclass(bool, int) is True`). `isinstance()` checks if an object is an instance of a class **or any of its subclasses**. However, `type(x) is T` checks exact object type identity without walking the inheritance chain.
+- **Antidote:** Use `isinstance()` for polymorphic compatibility, but `type(x) is int` if you must strictly exclude `bool` instances.
+
+---
+
+### Trap 13.4 (Trap 40): Instantiating an Incomplete Abstract Base Class `[Course: D10-02, Manual §11.6]`
+- **The Code:**
+  ```python
+  from abc import ABC, abstractmethod
+
+  class Service(ABC):
+      @abstractmethod
+      def execute(self): pass
+
+  class ConcreteService(Service):
+      pass
+
+  s = ConcreteService()
+  ```
+- **Intuitive Guess:** Instantiation succeeds; calling `s.execute()` returns `None`.
+- **Actual Reality:** `TypeError: Can't instantiate abstract class ConcreteService without an implementation for abstract method 'execute'`
+- **CPython Under the Hood:** Python's `ABCMeta` intercepts instantiation at `__call__` time. If any method in `__abstractmethods__` has not been overridden by a concrete implementation, instantiation is blocked immediately with a `TypeError`.
+- **Antidote:** Ensure every `@abstractmethod` is fully implemented in the child class before instantiating.
+
+---
+
+### Trap 13.5 (Trap 41): Private Attribute Isolation Across Inheritance `[Course: D10-05]`
+- **The Code:**
+  ```python
+  class Parent:
+      def __init__(self):
+          self.__token = "parent_token"
+
+  class Child(Parent):
+      def __init__(self):
+          super().__init__()
+          self.__token = "child_token"
+
+  c = Child()
+  print(c._Parent__token, c._Child__token)
+  ```
+- **Intuitive Guess:** The child's `__token` overwrites the parent's `__token`, raising an error or printing `"child_token child_token"`.
+- **Actual Reality:** Prints `"parent_token child_token"`.
+- **CPython Under the Hood:** Private name mangling prefixes double-underscore attributes with `_<ClassName>`. Inside `Parent`, `self.__token` compiles to `self._Parent__token`. Inside `Child`, `self.__token` compiles to `self._Child__token`. They reside as completely independent entries in `c.__dict__`.
+- **Antidote:** If an attribute is intended to be overridden or accessed by subclasses, use a single underscore `_token` (protected by convention), not double underscores.
+
+---
+
+### Trap 13.6 (Trap 42): Mutable Default Field in Dataclass `[Course: D10-02, Manual §11.9]`
+- **The Code:**
+  ```python
+  from dataclasses import dataclass
+
+  @dataclass
+  class Team:
+      members: list = []
+  ```
+- **Intuitive Guess:** Creates a class where each `Team` instance starts with an empty list.
+- **Actual Reality:** `ValueError: mutable default <class 'list'> for field members is not allowed: use default_factory`
+- **CPython Under the Hood:** Standard Python functions allow `def f(x=[])`, creating the notorious shared mutable default trap. To prevent this architectural flaw, `@dataclass` aggressively inspects field defaults at class-creation time and raises `ValueError` if a mutable container (`list`, `dict`, `set`) is assigned directly.
+- **Antidote:** Use `field(default_factory=list)`:
+  ```python
+  from dataclasses import dataclass, field
+  @dataclass
+  class Team:
+      members: list = field(default_factory=list)
+  ```
+
+---
+
 # The 60-Second "Trap Radar" Quick Reference
 
 | Trap Pattern | Code Trigger | What You Think Happens | What Actually Happens | Why |
@@ -776,3 +904,9 @@ c.radius = 10
 | **Missing Self** | `def click():` | Runs method | `TypeError` (takes 0, got 1)| `obj.click()` passes `self` automatically |
 | **Name Mangling** | `obj.__balance` | Reads attribute | `AttributeError` | Renamed to `_ClassName__balance` |
 | **Read-Only Prop** | `c.radius = 10` | Sets attribute | `AttributeError` | No setter defined |
+| **Forgotten Super**| `Child.__init__` no super| Sets parent fields | `AttributeError` | Parent `__init__` never called |
+| **Diamond MRO** | `D(B, C)` | Ambiguous / `"A"` | `"B"` | C3 Linearization evaluates `B` first |
+| **Bool is Int** | `isinstance(True, int)` | `False` | `True` | `bool` inherits from `int` |
+| **Abstract Base** | `ABC()` incomplete | Mock instance | `TypeError` | Unimplemented `@abstractmethod` |
+| **Subclass Private**| `Child.__x` vs `Parent.__x`| Overwrites parent | 2 distinct mangled names | `_Parent__x` and `_Child__x` |
+| **Dataclass Default**| `@dataclass field: list = []`| Independent list | `ValueError` | Dataclass prohibits direct mutable default |

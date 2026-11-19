@@ -4,7 +4,9 @@ Course: BCPD Python Certification — All Syllabus Domains
 Purpose: Programmatically asserts the exact CPython behavior for all traps documented in MASTER-EXAM-TRAPS-ENCYCLOPEDIA.md.
 """
 
+from abc import ABC, abstractmethod
 from collections import Counter, defaultdict, namedtuple
+from dataclasses import dataclass, field
 import math
 import sys
 
@@ -306,6 +308,79 @@ def test_domain_12_oop_and_encapsulation():
         pass
 
 
+def test_domain_13_inheritance_and_mro():
+    # Trap 13.1: Forgotten super().__init__()
+    class Base:
+        def __init__(self, name):
+            self.name = name
+
+    class Child(Base):
+        def __init__(self, name, age):
+            self.age = age
+
+    c = Child("Ada", 25)
+    try:
+        _ = c.name
+        assert False, "Should raise AttributeError because Base.__init__ was not called"
+    except AttributeError:
+        pass
+
+    # Trap 13.2: Diamond inheritance MRO
+    class A:
+        def who(self): return "A"
+    class B(A):
+        def who(self): return "B"
+    class C(A):
+        def who(self): return "C"
+    class D(B, C):
+        pass
+
+    assert D().who() == "B"
+    assert D.mro() == [D, B, C, A, object]
+
+    # Trap 13.3: isinstance(True, int) is True vs type(True) is int is False
+    assert isinstance(True, int) is True
+    assert (type(True) is int) is False
+    assert issubclass(bool, int) is True
+
+    # Trap 13.4: Incomplete ABC instantiation raises TypeError
+    class AbstractWorker(ABC):
+        @abstractmethod
+        def work(self): pass
+
+    class IncompleteWorker(AbstractWorker):
+        pass
+
+    try:
+        IncompleteWorker()  # type: ignore
+        assert False, "Should raise TypeError on instantiation of incomplete ABC"
+    except TypeError:
+        pass
+
+    # Trap 13.5: Private attribute mangling across inheritance
+    class ParentSecret:
+        def __init__(self):
+            self.__token = "parent"
+
+    class ChildSecret(ParentSecret):
+        def __init__(self):
+            super().__init__()
+            self.__token = "child"
+
+    cs = ChildSecret()
+    assert cs._ParentSecret__token == "parent"
+    assert cs._ChildSecret__token == "child"
+
+    # Trap 13.6: Dataclass mutable default assignment raises ValueError
+    try:
+        @dataclass
+        class BadDataclass:
+            items: list = []  # type: ignore
+        assert False, "Should raise ValueError on direct mutable default in dataclass"
+    except ValueError:
+        pass
+
+
 def main():
     print("Running Master Exam Traps Verification Suite...")
     test_domain_1_syntax_and_env()
@@ -320,7 +395,8 @@ def main():
     test_domain_10_tuples_and_collections()
     test_domain_11_dicts_and_sets()
     test_domain_12_oop_and_encapsulation()
-    print("All 36+ Exam Traps rigorously verified and PASSED against CPython runtime.")
+    test_domain_13_inheritance_and_mro()
+    print("All 42+ Exam Traps rigorously verified and PASSED against CPython runtime.")
 
 
 if __name__ == "__main__":

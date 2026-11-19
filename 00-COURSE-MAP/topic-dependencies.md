@@ -35,11 +35,15 @@ The original classroom decks split related topics across days and occasionally p
   ▼                                              ▼
 [11: Tuples, Dicts & Sets]             [12: OOP Classes & Encapsulation]
   │  (Tuples, namedtuple, dicts, hashability,     │  (__init__, self, methods, class vs instance,
-  │   collision trap, Counter, set algebra)       │   shared mutable trap, dunders, @property)
-  └──────────────────────┬──────────────────────┘
+  │   collision trap, Counter, set algebra)       │   shared mutable trap, dunders, @property, UML)
+  │                                              ▼
+  │                                    [13: OOP Inheritance & MRO]
+  │                                       (IS-A, super(), overriding, MRO/C3,
+  │                                        isinstance vs type, ABCs, dataclasses)
+  └──────────────────────┬───────────────────────┘
                          ▼
         [10: Central Exam Preparation Hub]
-           (40 MCQs, 42 Traps, 7 Drills, Solutions)
+           (45 MCQs, 47 Traps, 7 Drills, Solutions)
 ```
 
 ---
@@ -58,8 +62,9 @@ The original classroom decks split related topics across days and occasionally p
 | **08 Functions & Scope** | `04` (early returns), `07` (mutable lists & aliasing) | Reusable functions, mutable-default trap, LEGB, object-reference passing |
 | **09 Supplementary Bridges** | `02`, `07`, `08` | Connects Week 1 previews (`try/except`, imports, object model) to Week 2 topics |
 | **11 Tuples, Dicts & Sets** | `02` (hashability, immutability), `07` (sequences), `08` (functions) | Fast lookups, multiset counts (`Counter`), set algebra, structure selection |
-| **12 OOP & Encapsulation** | `08` (functions & scope), `09` (namespaces & exception objects) | Custom data modeling, instance vs class attributes, dunders, private mangling, properties |
-| **10 Exam Prep Hub** | `01`–`09`, `11`, `12` | Comprehensive exam readiness: 40 MCQs, 42 traps, 7 tracing drills, checklists |
+| **12 OOP & Encapsulation** | `08` (functions & scope), `09` (namespaces & exception objects) | Custom data modeling, instance vs class attributes, dunders, private mangling, properties, UML design, lifecycle |
+| **13 OOP Inheritance & MRO** | `12` (classes & instances) | Subclassing, parent calls (`super()`), method overriding, shared templates, MRO / C3 linearization, ABCs, dataclasses |
+| **10 Exam Prep Hub** | `01`–`09`, `11`, `12`, `13` | Comprehensive exam readiness: 45 MCQs, 47 traps, 7 tracing drills, checklists |
 
 ---
 
@@ -69,3 +74,4 @@ The original classroom decks split related topics across days and occasionally p
 2. **Comprehensions Before Lists (`Day 4` before `Day 5`):** `IMG-54` uses lists, dicts, and sets before Day 5 teaches lists (`IMG-78`). Moving comprehensions into Module `07` after basic list mechanics removes the forward jump.
 3. **Tuples, Dictionaries & Sets (`Day 8`):** Fully isolated into dedicated Module `11` with detailed coverage of `namedtuple`, hash collisions, `Counter`, and set algebra.
 4. **OOP & Encapsulation (`Day 9`):** Fully established as Module `12` providing the object model foundation before Day 10–11 inheritance and polymorphism.
+5. **OOP Inheritance & MRO (`Day 10`):** Structured as Module `13` covering Manual Day 11 (§11.1–11.10), resolving multiple inheritance, MRO linearization, and abstract interfaces.

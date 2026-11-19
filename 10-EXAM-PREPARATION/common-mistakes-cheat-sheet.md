@@ -77,4 +77,18 @@
 | **T30** | Direct private attribute access:<br>`print(obj.__balance)` | Double leading underscore name-mangles attribute to `_ClassName__balance`; raises `AttributeError`. | Provide a public getter via `@property` or access via `obj._ClassName__balance`. | `D9-06, D9-11` |
 | **T31** | Assigning to a read-only property:<br>`t.fahrenheit = 100` | A `@property` without a corresponding `@<name>.setter` raises `AttributeError: can't set attribute`. | Define a `@fahrenheit.setter` method or set the underlying state (`celsius`). | `D9-10` |
 | **T32** | Expecting instance assignment to update class:<br>`a = Dog(); a.species = "wolf"` | Instance assignment creates a local attribute in `a.__dict__`, masking but not touching `Dog.species`. | Mutate class directly if global change is intended: `Dog.species = "wolf"`. | `D9-08` |
+| **T33** | Expecting `del obj` to immediately destroy object:<br>`del obj` | `del obj` unbinds variable name; `__del__` destructor executes only when reference count reaches 0. | Ensure all aliases and container references are removed if immediate finalization is needed. | `D9-EXT-02` |
+
+---
+
+## 7. OOP Inheritance, MRO & ABC Traps (Day 10)
+
+| # | Trap / Anti-Pattern | Why It Breaks | Do This Instead | Course Citation |
+|---|---|---|---|---|
+| **T34** | Omitting `super().__init__()` in child:<br>`class Child(Base): def __init__(self): pass` | Child constructor does NOT automatically call base constructor; base attributes are never initialized (`AttributeError`). | Always invoke `super().__init__(*args)` at start of child `__init__`. | `D10-05` |
+| **T35** | Assuming depth-first search in Diamond inheritance:<br>`D(B, C)` where `B(A)` and `C(A)` | Python uses C3 Linearization (monotonic MRO): `D -> B -> C -> A -> object`. `B` overrides `C` only because declared first. | Check `Class.mro()` to verify exact method lookup sequence. | `D10-04, D10-06` |
+| **T36** | Confusing `isinstance()` with `type() is` on booleans:<br>`type(True) is int` vs `isinstance(True, int)` | `bool` inherits from `int`, so `isinstance(True, int)` is `True`, but `type(True)` is strictly `bool`. | Use `type(x) is int` if you must exclude booleans. | `D10-07` |
+| **T37** | Instantiating an incomplete Abstract Base Class:<br>`class Sub(ABC): pass; Sub()` | Classes inheriting from `ABC` with unimplemented `@abstractmethod`s raise `TypeError` at instantiation. | Implement all abstract methods in derived class before instantiating. | `D10-02` |
+| **T38** | Expecting child `self.__secret` to overwrite parent's:<br>`class Child(Parent): self.__secret = 99` | Double underscore attributes are mangled to `_Parent__secret` and `_Child__secret` independently. | Use single underscore `_secret` for inheritable attributes intended for subclass modification. | `D10-05` |
+| **T39** | Using mutable default in `@dataclass`:<br>`@dataclass class Group: members: list = []` | Raises `ValueError` at class creation time because dataclass proactively blocks the shared mutable default trap. | Use `field(default_factory=list)` for list, dict, or set fields. | `D10-02` |
 
