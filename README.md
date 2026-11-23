@@ -1,21 +1,21 @@
 ﻿# BCPD Python Certification — Structured Learning & Exam Prep System
 
-Welcome to your reconstructed, exam-focused Python learning environment built from your **BCPD Cohort 2** classroom materials (`Week 1 & Week 2, Days 1–11`).
+Welcome to your reconstructed, exam-focused Python learning environment built from your **BCPD Cohort 2** classroom materials (`Week 1, Week 2 & Week 3, Days 1–13`).
 
-> **Preservation Guarantee:** All concepts, code snippets, and quizzes from the initial 79 classroom slides, Day 5 & 6 slides, Week 2 Day 8 & Day 9 slides, Day 9 extensions & Day 10 slides, and latest Day 10 finalization & Day 11 slides (`Polymorphism, Overloading & OOP Design`) are 100% extracted, verified, and preserved with complete provenance citations.
+> **Preservation Guarantee:** All concepts, code snippets, and quizzes from the initial 79 classroom slides, Day 5 & 6 slides, Week 2 Day 8 & Day 9 slides, Day 9 extensions & Day 10 slides, Day 11 slides (`Polymorphism, Overloading & OOP Design`), and latest Day 13 slides (`Modules Part 1: Imports, sys, math & random`) are 100% extracted, verified, and preserved with complete provenance citations.
 
 ---
 
 ## How to Study With This System
 
-1. **Follow the Dependency Order (`01` → `14`)**, not the fragmented slide capture order.
+1. **Follow the Dependency Order (`01` → `15`)**, not the fragmented slide capture order.
    - Read each module's `README.md` first (conceptual foundation → mental models → original vs. corrected code → line-by-line walkthrough → step-by-step tracing → pitfalls → MCQs).
 2. **Run and Modify `examples.py`** in each module (`Python 3.10+` required for `f"{x=}"`, `match-case`, and union type hints).
    - Classroom code is always preserved verbatim as `ORIGINAL CLASSROOM CODE`; fixed or guarded versions are kept separate as `CORRECTED / IMPROVED CODE`.
 3. **Attempt `exercises.py` Before Checking Solutions.**
    - Every module has progressive Level 1–4 exercises. Solutions are stored separately under `10-EXAM-PREPARATION/solutions/` so you test your own reasoning first.
 4. **Drill Exam Traps (`10-EXAM-PREPARATION/`).**
-   - Review the instructor's Knowledge Checks (Days 1–11), output-prediction sheets, common-mistakes cheat sheet, and 53+ MCQ traps.
+   - Review the instructor's Knowledge Checks (Days 1–11, Day 13), output-prediction sheets, common-mistakes cheat sheet, and 59+ MCQ traps.
 
 ---
 
@@ -29,6 +29,7 @@ Welcome to your reconstructed, exam-focused Python learning environment built fr
 | `[Course: D9-EXT-XX]` | Directly verified from Day 9 Extensions (UML class design, dynamic attributes, lifecycle destructor `__del__`, Lab 9.1 BankAccount) |
 | `[Course: D10-XX]` | Directly verified from Week 2 Day 10 presentation deck (Inheritance, `super()`, method overriding, `isinstance`/`issubclass`, MRO, C3 linearization, ABCs, dataclasses) |
 | `[Course: D11-XX]` | Directly verified from Week 2 Day 11 presentation deck (Polymorphism, Duck Typing, Operator Overloading, singledispatch, `__slots__`, OOP Design & SRP) |
+| `[Course: D13-XX]` | Directly verified from Week 3 Day 13 presentation deck (Modules Part 1: Imports, `sys.path`, `sys`, `math`, `random` vs `secrets`, Lab 13.1) |
 | `[Course: D5-REV-XX]` | Directly verified from List methods, grid 2D trap, and string formatting review slides |
 | `[Reconstructed Key]` | Verified answer key reconstructed where the instructor's Answers slide was missing (Day 2 Knowledge Check, `IMG-30`) |
 | `[Supplementary]` | Foundational explanation, edge case, or exam-style drill added to resolve a gap or blindspot |
@@ -39,7 +40,7 @@ Welcome to your reconstructed, exam-focused Python learning environment built fr
 
 | Module / Hub | Focus | Source Coverage | Build Status |
 |---|---|---|---|
-| [00-COURSE-MAP](./00-COURSE-MAP/screenshot-inventory.md) | Master inventories (`79` initial + `16` Day 5/6 + `34` Day 8/9 + `14` Day 9ext/10 + `20` Day 10fin/11 files), Day 1–11 outline, dependency graph | `IMG-01`–`IMG-79`, `D5-01`–`D6-11`, `D8-01`–`D9-11`, `D9-EXT-01`–`D10-15`, `D11-01`–`D11-08` | **Complete** |
+| [00-COURSE-MAP](./00-COURSE-MAP/screenshot-inventory.md) | Master inventories (`79` initial + `16` Day 5/6 + `34` Day 8/9 + `14` Day 9ext/10 + `20` Day 10fin/11 + `17` Day 13 files), Day 1–13 outline, dependency graph | `IMG-01`–`IMG-79`, `D5-01`–`D6-11`, `D8-01`–`D9-11`, `D9-EXT-01`–`D10-15`, `D11-01`–`D11-08`, `D13-01`–`D13-14` | **Complete** |
 | [01-FOUNDATIONS-AND-ENV](./01-FOUNDATIONS-AND-ENV/README.md) | BCPD overview, CPython pipeline, `venv`/`pip`, PEP 8, `print`/`input`, Lab 1 | Day 1 + `IMG-56` | **Complete** |
 | [02-TYPES-VARIABLES-AND-TRUTHINESS](./02-TYPES-VARIABLES-AND-TRUTHINESS/README.md) | Naming, bases/conversions, floats/`round()`, truthiness, `==` vs `is` | Day 2 (`§2.1–2.8, §2.26–2.31`) + `IMG-32` | **Complete** |
 | [03-OPERATORS-AND-BITWISE](./03-OPERATORS-AND-BITWISE/README.md) | Arithmetic (`/`, `//`, `%`), precedence, `:=`, bitwise & flags, Lab 2.1 | Day 2 (`§2.22–2.29`, Beyond Manual) | **Complete** |
@@ -53,7 +54,8 @@ Welcome to your reconstructed, exam-focused Python learning environment built fr
 | [12-OOP-CLASSES-AND-ENCAPSULATION](./12-OOP-CLASSES-AND-ENCAPSULATION/README.md) | Classes, `__init__`, `self`, methods, class vs instance attributes, shared mutable trap, dunders, encapsulation, `@property`, UML design, lifecycle `__del__` | Day 9 (`§10.1–10.10`) + `D9-01` to `D9-11` + `D9-EXT-01` to `04` | **Complete** |
 | [13-OOP-INHERITANCE-AND-MRO](./13-OOP-INHERITANCE-AND-MRO/README.md) | Inheritance (IS-A), 6 inheritance types, `super()`, method overriding, shared template polymorphism, `isinstance`/`issubclass`, MRO (C3 linearization), ABCs, mixins, dataclasses | Day 10 (`§11.1–11.10`) + `D10-01` to `D10-15` | **Complete** |
 | [14-OOP-POLYMORPHISM-AND-DESIGN](./14-OOP-POLYMORPHISM-AND-DESIGN/README.md) | Polymorphism, duck typing (`duck.py`), operator overloading (`vector.py`, `__rmul__`, `@total_ordering`), singledispatch, memory optimization & data hiding with `__slots__` (`slots.py`), SOLID SRP/LSP, Lab 11.1 Matrix | Day 11 (Manual Day 12 `§12.1–12.6` + Day 13 `§13.1–13.5`) + `D11-01` to `D11-08` | **Complete** |
-| [10-EXAM-PREPARATION](./10-EXAM-PREPARATION/instructor-knowledge-checks.md) | Knowledge Checks, MCQ trap bank, output drills, mistakes cheat sheet, checklist, separated solutions | Days 1–11 Quizzes (50 MCQs) + Category F (53 Traps) + Sanfoundry map | **Complete** |
+| [15-MODULES-SYS-MATH-AND-RANDOM](./15-MODULES-SYS-MATH-AND-RANDOM/README.md) | Domain 4 (15% exam weight): Import styles, `sys.modules` caching, `sys.path` search order, 4 import pitfalls, `sys` runtime hooks, `math` precision favourites, `random` distributions, PRNG vs `secrets`, Lab 13.1 Dice & Password CLI | Day 13 (Manual Day 14 `§14.1–14.6`) + `D13-01` to `D13-14` | **Complete** |
+| [10-EXAM-PREPARATION](./10-EXAM-PREPARATION/instructor-knowledge-checks.md) | Knowledge Checks, MCQ trap bank, output drills, mistakes cheat sheet, checklist, separated solutions | Days 1–11 & Day 13 Quizzes (55 MCQs) + Category F (59 Traps) + Sanfoundry map | **Complete** |
 
 ---
 
@@ -61,14 +63,14 @@ Welcome to your reconstructed, exam-focused Python learning environment built fr
 
 Quick access to all assessment, trap analysis, and drill documents in `10-EXAM-PREPARATION/`:
 
-1. **[Master Exam Traps Encyclopedia](./10-EXAM-PREPARATION/MASTER-EXAM-TRAPS-ENCYCLOPEDIA.md)**: **The Comprehensive Trap Encyclopedia** across all 14 syllabus domains. Analyzes the 10 cognitive trap archetypes, dissects 48+ specific pitfalls with CPython internals, bait vs. reality analysis, antidotes, and 60-second quick radar table.
-2. [Instructor Knowledge Checks](./10-EXAM-PREPARATION/instructor-knowledge-checks.md): **All 50 classroom MCQs from Days 1–11** with verified answer keys, detailed explanations, and distractor analyses.
-3. [MCQ Traps Bank](./10-EXAM-PREPARATION/mcq-traps-bank.md): **53 high-yield certification trap questions** across all syllabus domains (including `fromkeys` list trap, dict collision, set operator type errors, class attribute sharing, forgotten `super()`, diamond MRO, reflected operator failure, and `__slots__` attribute error).
+1. **[Master Exam Traps Encyclopedia](./10-EXAM-PREPARATION/MASTER-EXAM-TRAPS-ENCYCLOPEDIA.md)**: **The Comprehensive Trap Encyclopedia** across all 15 syllabus domains. Analyzes the 10 cognitive trap archetypes, dissects 54+ specific pitfalls with CPython internals, bait vs. reality analysis, antidotes, and 60-second quick radar table.
+2. [Instructor Knowledge Checks](./10-EXAM-PREPARATION/instructor-knowledge-checks.md): **All 55 classroom MCQs from Days 1–11 and Day 13** with verified answer keys, detailed explanations, and distractor analyses.
+3. [MCQ Traps Bank](./10-EXAM-PREPARATION/mcq-traps-bank.md): **59 high-yield certification trap questions** across all syllabus domains (including `fromkeys` list trap, dict collision, set operator type errors, class attribute sharing, forgotten `super()`, diamond MRO, reflected operator failure, `__slots__` attribute error, CWD module shadowing, and `random.shuffle` tuple `TypeError`).
 4. [Output Prediction Drills](./10-EXAM-PREPARATION/output-prediction-drills.md): 7 whiteboard & mental trace drills with line-by-line trace tables.
-5. [Sanfoundry Practice Sets](./10-EXAM-PREPARATION/sanfoundry-practice-sets.md): 7 curated problem sets referenced in instructor summaries (`IMG-31`, `IMG-49`) and Days 8, 9, 10, 11.
-6. [Common Mistakes Cheat Sheet](./10-EXAM-PREPARATION/common-mistakes-cheat-sheet.md): Category F 45-trap quick reference ("Don't Do This" ➔ "Do This Instead").
-7. [Revision Checklist](./10-EXAM-PREPARATION/revision-checklist.md): 13-section comprehensive readiness self-assessment checklist.
-8. [Separated Solutions](./10-EXAM-PREPARATION/solutions/): Clean reference implementations for all module exercises (Modules 01–09, 11, 12, 13, 14).
+5. [Sanfoundry Practice Sets](./10-EXAM-PREPARATION/sanfoundry-practice-sets.md): 7 curated problem sets referenced in instructor summaries (`IMG-31`, `IMG-49`) and Days 8, 9, 10, 11, 13.
+6. [Common Mistakes Cheat Sheet](./10-EXAM-PREPARATION/common-mistakes-cheat-sheet.md): Category F 51-trap quick reference ("Don't Do This" ➔ "Do This Instead").
+7. [Revision Checklist](./10-EXAM-PREPARATION/revision-checklist.md): 14-section comprehensive readiness self-assessment checklist.
+8. [Separated Solutions](./10-EXAM-PREPARATION/solutions/): Clean reference implementations for all module exercises (Modules 01–09, 11, 12, 13, 14, 15).
 
 ---
 
@@ -82,4 +84,4 @@ $py = "C:\Users\kimat\AppData\Local\Python\pythoncore-3.15-64\python.exe"
 ```
 
 - **Target Python Version:** **Python 3.10+** (verified locally: **Python 3.15.2**).
-- **Test Results:** **40 / 40 test suites passing (100% success rate)** across all 13 module example suites, 13 exercise suites, 1 master traps verification suite, and 13 solution runners.
+- **Test Results:** **43 / 43 test suites passing (100% success rate)** across all 14 module example suites, 14 exercise suites, 1 master traps verification suite, and 14 solution runners.

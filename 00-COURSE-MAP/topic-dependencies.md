@@ -46,8 +46,12 @@ The original classroom decks split related topics across days and occasionally p
   │                                        singledispatch, __slots__, SRP, Matrix)
   └──────────────────────┬───────────────────────┘
                          ▼
+        [15: Modules, sys, math & random]
+           (Import styles, sys.modules, sys.path,
+            sys runtime, math favourites, random vs secrets)
+                         ▼
         [10: Central Exam Preparation Hub]
-           (50 MCQs, 53 Traps, 7 Drills, Solutions)
+           (55 MCQs, 59 Traps, 7 Drills, Solutions)
 ```
 
 ---
@@ -69,7 +73,8 @@ The original classroom decks split related topics across days and occasionally p
 | **12 OOP & Encapsulation** | `08` (functions & scope), `09` (namespaces & exception objects) | Custom data modeling, instance vs class attributes, dunders, private mangling, properties, UML design, lifecycle |
 | **13 OOP Inheritance & MRO** | `12` (classes & instances) | Subclassing, parent calls (`super()`), method overriding, shared templates, MRO / C3 linearization, ABCs, dataclasses |
 | **14 OOP Polymorphism & Design** | `12`, `13` | Duck typing, operator overloading (`__rmul__`), `@singledispatch`, `__slots__`, SRP, LSP, Matrix class |
-| **10 Exam Prep Hub** | `01`–`09`, `11`, `12`, `13`, `14` | Comprehensive exam readiness: 50 MCQs, 53 traps, 7 tracing drills, checklists |
+| **15 Modules, sys, math & random** | `08` (functions), `12` (classes) | Import styles, `sys.modules`, `sys.path`, CLI parsing, `math` precision, `random` vs `secrets`, Lab 13.1 |
+| **10 Exam Prep Hub** | `01`–`09`, `11`–`15` | Comprehensive exam readiness: 55 MCQs, 59 traps, 7 tracing drills, checklists |
 
 ---
 
@@ -81,3 +86,4 @@ The original classroom decks split related topics across days and occasionally p
 4. **OOP & Encapsulation (`Day 9`):** Fully established as Module `12` providing the object model foundation before Day 10–11 inheritance and polymorphism.
 5. **OOP Inheritance & MRO (`Day 10`):** Structured as Module `13` covering Manual Day 11 (§11.1–11.10), resolving multiple inheritance, MRO linearization, and abstract interfaces.
 6. **OOP Polymorphism & Design (`Day 11`):** Structured as Module `14` covering Manual Day 12 (§12.1–12.6) + Day 13 (§13.1–13.5), mastering dynamic polymorphism, dunder arithmetic protocols, memory-efficient slotted structures, and clean architecture.
+7. **Modules Part 1: Imports, `sys`, `math` & `random` (`Day 13`):** Structured as Module `15` covering Manual Day 14 (§14.1–14.6) for Domain 4 (15% exam weight), mastering module resolution, caching, math precision, and random generation.

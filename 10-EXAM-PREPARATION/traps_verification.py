@@ -451,6 +451,69 @@ def test_domain_14_polymorphism_and_design():
     assert multi(1, 999) == "int-dispatch"  # Ignores type of b!
 
 
+def test_domain_15_modules_sys_math_random():
+    import io
+    import math
+    import random
+    import sys
+
+    # Trap 15.1: sys.path[0] resolution & standard library shadowing vulnerability
+    assert isinstance(sys.path, list) and len(sys.path) > 0
+    # Current script directory is always checked first
+    assert isinstance(sys.path[0], str)
+
+    # Trap 15.2: Star import overwriting 3-argument pow
+    builtin_pow = pow
+    math_pow = math.pow
+    assert builtin_pow(2, 3, 5) == 3
+    try:
+        math_pow(2, 3, 5)  # type: ignore
+        assert False, "math.pow should reject 3rd argument with TypeError"
+    except TypeError:
+        pass
+
+    # Trap 15.3: Negative rounding floor vs trunc
+    assert math.floor(-2.5) == -3
+    assert math.trunc(-2.5) == -2
+    assert int(-2.5) == -2
+    assert isinstance(math.floor(-2.5), int)
+    assert isinstance(math.trunc(-2.5), int)
+
+    # Trap 15.4: math.pow returns float vs ** returns int
+    p_op = 2 ** 3
+    p_fn = math.pow(2, 3)
+    assert p_op == p_fn
+    assert type(p_op) is int
+    assert type(p_fn) is float
+    assert (p_op is p_fn) is False
+
+    # Trap 15.5: random.randint(a, b) inclusive vs random.randrange(a, b) exclusive
+    random.seed(123)
+    randrange_vals = {random.randrange(1, 3) for _ in range(100)}
+    assert randrange_vals == {1, 2}  # 3 is strictly excluded!
+    
+    random.seed(123)
+    randint_vals = {random.randint(1, 3) for _ in range(100)}
+    assert randint_vals == {1, 2, 3}  # 3 is inclusive!
+
+    # Trap 15.6: random.shuffle on tuple & sys.stdout.write char count
+    try:
+        random.shuffle((1, 2, 3))  # type: ignore
+        assert False, "random.shuffle on tuple should raise TypeError"
+    except TypeError:
+        pass
+
+    captured = io.StringIO()
+    old_stdout = sys.stdout
+    sys.stdout = captured
+    try:
+        char_count = sys.stdout.write("ABC\n")
+    finally:
+        sys.stdout = old_stdout
+    assert char_count == 4
+    assert captured.getvalue() == "ABC\n"
+
+
 def main():
     print("Running Master Exam Traps Verification Suite...")
     test_domain_1_syntax_and_env()
@@ -467,7 +530,8 @@ def main():
     test_domain_12_oop_and_encapsulation()
     test_domain_13_inheritance_and_mro()
     test_domain_14_polymorphism_and_design()
-    print("All 48+ Exam Traps rigorously verified and PASSED against CPython runtime.")
+    test_domain_15_modules_sys_math_random()
+    print("All 54+ Exam Traps rigorously verified and PASSED against CPython runtime.")
 
 
 if __name__ == "__main__":

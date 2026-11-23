@@ -1000,6 +1000,122 @@ c.radius = 10
 
 ---
 
+# Domain 15: Modules, `sys`, `math` & `random` Traps
+
+### Trap 15.1 (Trap 49): Shadowing Standard Library Modules via Current Working Directory `[Course: D13-04, D13-05]`
+- **The Code:**
+  ```python
+  # In a directory containing a local file named 'math.py' or 'random.py':
+  import math
+  print(math.sqrt(16))
+  ```
+- **Intuitive Guess:** Python loads the standard library `math` module and prints `4.0`.
+- **Actual Reality:** `AttributeError: module 'math' has no attribute 'sqrt'` (or circular import error).
+- **CPython Under the Hood:** CPython sets `sys.path[0]` to the directory containing the input script. When searching for `math`, CPython finds the local `./math.py` before searching the standard library directory!
+- **Antidote:** Never name project script files with names matching standard library modules (`math.py`, `random.py`, `sys.py`, `string.py`, `test.py`).
+
+---
+
+### Trap 15.2 (Trap 50): Star Import (`from math import *`) Clobbering Built-ins & Globals `[Course: D13-03, D13-05]`
+- **The Code:**
+  ```python
+  e = 25  # Local variable tracking error count
+  from math import *
+  print(e)
+  print(pow(2, 3, 5))  # Modular exponentiation: 2^3 % 5 = 3
+  ```
+- **Intuitive Guess:** Prints `25`, then computes modular exponentiation `3`.
+- **Actual Reality:**
+  - `print(e)` prints `2.718281828459045` (Euler's number)!
+  - `pow(2, 3, 5)` raises `TypeError: pow() takes 2 positional arguments but 3 were given`.
+- **CPython Under the Hood:** `from math import *` dumps all non-underscore symbols from `math` directly into the current namespace. It quietly overwrites the local `e` with `math.e`, and overwrites Python's built-in 3-argument `pow(base, exp, mod)` with `math.pow(x, y)` which takes strictly 2 arguments!
+- **Antidote:** Avoid star imports (`from module import *`). Use `import math` or explicit name imports `from math import sqrt, pi`.
+
+---
+
+### Trap 15.3 (Trap 51): Negative Floored vs Truncated Division & Rounding Direction `[Course: D13-07, D13-14]`
+- **The Code:**
+  ```python
+  import math
+  print(math.floor(-2.5))
+  print(math.trunc(-2.5))
+  print(int(-2.5))
+  ```
+- **Intuitive Guess:** All three return `-2`.
+- **Actual Reality:**
+  ```python
+  -3
+  -2
+  -2
+  ```
+- **CPython Under the Hood:** `math.floor(x)` rounds **downward** towards negative infinity ($-\infty$). Since $-3 < -2.5$, the floor is $-3$. In contrast, `math.trunc(x)` and `int(x)` truncate fractional digits towards **zero**, yielding $-2$.
+- **Antidote:** Remember the number line: `floor()` moves left (more negative), `trunc()` moves towards zero.
+
+---
+
+### Trap 15.4 (Trap 52): `math.pow()` vs `**` Implicit Float Return `[Course: D13-07]`
+- **The Code:**
+  ```python
+  import math
+  p1 = 2 ** 3
+  p2 = math.pow(2, 3)
+  print(type(p1), type(p2))
+  print(p1 == p2, p1 is p2)
+  ```
+- **Intuitive Guess:** Both return integer `8`.
+- **Actual Reality:**
+  ```python
+  <class 'int'> <class 'float'>
+  True False
+  ```
+- **CPython Under the Hood:** Built-in `**` preserves integer types when operands are integers. However, `math.pow()` converts **both** arguments to C `double` floats under the hood and **always** returns a `float` (`8.0`).
+- **Antidote:** Use `**` for exact integer powers; use `math.pow()` only when floating-point precision is specifically desired.
+
+---
+
+### Trap 15.5 (Trap 53): Endpoint Boundary: `random.randint()` (Inclusive) vs `random.randrange()` (Exclusive) `[Course: D13-10, D13-14]`
+- **The Code:**
+  ```python
+  import random
+  # In an exam question asking for possible values:
+  r1 = random.randrange(1, 5)
+  r2 = random.randint(1, 5)
+  ```
+- **Intuitive Guess:** Both return numbers in `{1, 2, 3, 4}`.
+- **Actual Reality:**
+  - `r1` (`randrange`) returns `{1, 2, 3, 4}` (5 is excluded, exactly like `range()`).
+  - `r2` (`randint`) returns `{1, 2, 3, 4, 5}` (**5 is inclusive!**).
+- **CPython Under the Hood:** `random.randint(a, b)` is explicitly implemented as `random.randrange(a, b + 1)`.
+- **Antidote:** Lock this distinction into memory: `randint` includes BOTH ends; `randrange` excludes the stop argument.
+
+---
+
+### Trap 15.6 (Trap 54): `random.shuffle()` In-Place Mutation on Tuples & `sys.stdout.write()` Return Value `[Course: D13-12]`
+- **The Code:**
+  ```python
+  import random, sys
+  try:
+      random.shuffle((1, 2, 3))
+  except Exception as e:
+      print(type(e).__name__)
+
+  n = sys.stdout.write("hi\n")
+  print("Count:", n)
+  ```
+- **Intuitive Guess:** Shuffling returns a new tuple or runs normally; `stdout.write()` returns `None`.
+- **Actual Reality:**
+  ```python
+  TypeError
+  hi
+  Count: 3
+  ```
+- **CPython Under the Hood:**
+  1. `random.shuffle(seq)` mutates `seq` in-place using item assignment (`seq[i], seq[j] = seq[j], seq[i]`). Since tuples are immutable, item assignment raises `TypeError`.
+  2. Unlike `print()` which returns `None`, `sys.stdout.write()` returns the **exact number of characters written** (`"h"`, `"i"`, `"\n"` = 3 characters).
+- **Antidote:** Only pass mutable lists to `random.shuffle()`. Never expect `sys.stdout.write()` to return `None` or automatically append a newline.
+
+---
+
 # The 60-Second "Trap Radar" Quick Reference
 
 | Trap Pattern | Code Trigger | What You Think Happens | What Actually Happens | Why |
@@ -1038,3 +1154,9 @@ c.radius = 10
 | **Slot Typo Block**| `fixed.z = 10` | Adds attribute | `AttributeError` | `__slots__` blocks unlisted attributes |
 | **Slot No Dict** | `vars(slotted_obj)` | Returns attributes | `TypeError` | Slotted objects do not have `__dict__` |
 | **Singledispatch** | `@singledispatch f(a, b)` | Dispatches on `a, b`| Dispatches ONLY on `a` | Ignores types of second and later args |
+| **Module Shadowing**| Local `math.py` | Imports stdlib `math`| `AttributeError` | `sys.path[0]` is cwd; local file masks stdlib |
+| **Star Import Clobber**| `from math import *` | Preserves `pow()` | `pow` only takes 2 args | Star import silently overwrites built-in `pow` |
+| **Negative Floor** | `math.floor(-2.5)` | `-2` | `-3` | Rounds down towards $-\infty$ |
+| **Math Pow Float** | `math.pow(2, 3)` | `8` (`int`) | `8.0` (`float`) | `math.pow` always returns float |
+| **Randint Inclusive**| `random.randint(1, 3)` | 1 or 2 | 1, 2, or 3 | Both start and stop are inclusive |
+| **Shuffle Tuple** | `random.shuffle((1, 2))`| Shuffled tuple | `TypeError` | Shuffle mutates in-place; tuples are immutable |

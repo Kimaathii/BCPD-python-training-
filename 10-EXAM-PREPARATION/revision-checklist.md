@@ -168,4 +168,32 @@
 - [ ] Enforce the Singleton pattern using `__new__` to restrict a class to a single heap instance.
 - [ ] Build Lab 11.1 Matrix class with rectangular validation, element-wise addition, scalar multiplication, and reflected operators.
 
+---
+
+## 14. Modules, `sys`, `math` & `random` `[Module 15]`
+- [ ] Understand the 5 import styles: direct, aliased, symbol, symbol aliased, and star import. `[D13-03]`
+- [ ] Explain `sys.modules` caching: top-level module code runs only once on initial import; subsequent imports reuse the cached object. `[D13-03]`
+- [ ] Trace `sys.path` search order: script directory -> `PYTHONPATH` -> standard library -> `site-packages`. `[D13-04]`
+- [ ] Prevent the module shadowing trap: never name local files `math.py`, `random.py`, `sys.py`, or other standard module names. `[D13-04, D13-05]`
+- [ ] Diagnose circular imports (`ImportError: cannot import name from partially initialized module`) and resolve via third-party module or deferred imports. `[D13-05]`
+- [ ] Avoid star imports (`from module import *`): pollutes namespace, masks origin, and ignores names prefixed with leading underscore `_`. `[D13-03, D13-05, D13-12]`
+- [ ] Use `sys.argv`: `argv[0]` is script name, `argv[1:]` are CLI arguments as strings. `[D13-06, D13-14]`
+- [ ] Use `sys.exit(code)`: `0` for success, non-zero for error; raises `SystemExit`. `[D13-06]`
+- [ ] Distinguish `sys.stdout.write()` (returns character count written, no newline) from `print()` (returns `None`, appends `\n`). `[D13-12]`
+- [ ] Understand `len(s)` vs `sys.getsizeof(s)`: string length vs CPython object heap allocation in bytes. `[D13-12]`
+- [ ] Apply `math.floor(-2.5) == -3` (rounds down towards $-\infty$) vs `math.trunc(-2.5) == -2` (truncates towards 0). `[D13-07, D13-14]`
+- [ ] Know that `math.pow(x, y)` always returns a `float` (`8.0`), whereas `2 ** 3` returns an `int` (`8`). `[D13-07]`
+- [ ] Use `math.fabs()` (always returns float) vs built-in `abs()` (preserves int type). `[D13-07, D13-09]`
+- [ ] Unpack `math.modf(x)` into `(fractional_part, integer_part)`, both as floats. `[D13-09]`
+- [ ] Use `math.copysign(x, y)`: size of $x$, sign of $y$ (including signed negative zero `-0.0`). `[D13-09]`
+- [ ] Use `math.fsum()` for exact floating-point accumulation without IEEE 754 precision drift. `[D13-09]`
+- [ ] Remember all Python trigonometry functions (`math.sin`, `math.cos`, `math.tan`) expect angles in **radians**, not degrees. `[D13-08]`
+- [ ] Note that `math.factorial(0) == 1`, negative raises `ValueError`, and floats raise `TypeError` in Python 3.10+. `[D13-09]`
+- [ ] Distinguish `random.randint(a, b)` (both $a$ and $b$ inclusive) from `random.randrange(a, b)` (stop $b$ excluded). `[D13-10, D13-14]`
+- [ ] Compare `random.choices()` (sampling with replacement, allows duplicates) vs `random.sample()` (strictly unique items without replacement). `[D13-10, D13-11]`
+- [ ] Know that `random.shuffle()` mutates in-place and returns `None`; raises `TypeError` on immutable sequences like tuples. `[D13-10, D13-12]`
+- [ ] Enforce the security boundary: PRNG `random` (Mersenne Twister) is predictable; use `secrets` for passwords, tokens, and cryptographic keys. `[D13-11]`
+- [ ] Build reusable modules with `if __name__ == "__main__":` self-test harnesses. `[D13-13, D13-14]`
+
+
 

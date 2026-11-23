@@ -105,3 +105,17 @@
 | **T44** | In-place mutation in binary operator:<br>`def __add__(self, other): self.v += other.v; return self` | Binary operators must return a fresh object; in-place mutation corrupts existing operands. | Always return a new instance: `return Cls(self.v + other.v)`. | `D11-05` |
 | **T45** | Expecting `@singledispatch` to check all args:<br>`@singledispatch def f(a, b):` | `@singledispatch` inspects the type of **only the first argument** `a`. | Handle multiple arguments with nested `isinstance` checks. | `D11-06` |
 
+---
+
+## 9. Modules, `sys`, `math` & `random` Traps (Day 13)
+
+| # | Trap / Anti-Pattern | Why It Breaks | Do This Instead | Course Citation |
+|---|---|---|---|---|
+| **T46** | Local script naming shadowing stdlib:<br>`random.py` in script directory | `sys.path[0]` is current working directory; local file shadows stdlib module, raising `AttributeError`. | Never name local script files after standard library modules (`math.py`, `random.py`, `sys.py`). | `D13-04, D13-05` |
+| **T47** | Star import clobbering built-ins:<br>`from math import *; pow(2, 3, 5)` | Star import dumps `math.pow` (takes strictly 2 args) into namespace, clobbering built-in 3-arg `pow()`. | Use `import math` and call `math.sqrt()` or import specific names. | `D13-03, D13-05` |
+| **T48** | Confusing `math.floor()` with `math.trunc()` on negatives:<br>`math.floor(-2.5)` | `floor()` rounds down towards $-\infty$ (`-3`), while `trunc()` strips decimals towards $0$ (`-2`). | Use `math.floor()` for mathematical lower bound; `math.trunc()` for integer truncation. | `D13-07, D13-14` |
+| **T49** | Expecting integer from `math.pow()`:<br>`math.pow(2, 3)` | `math.pow()` converts arguments to C doubles and **always returns float** (`8.0`). | Use `2 ** 3` for integer exponentiation. | `D13-07` |
+| **T50** | Confusing `randint` and `randrange` bounds:<br>`random.randint(1, 3)` | Unlike `range()` and `randrange()`, `randint(a, b)` includes **both** $a$ and $b$ inclusive. | Remember: `randint(1, 3)` can return `3`; `randrange(1, 3)` returns only `1` or `2`. | `D13-10, D13-14` |
+| **T51** | Calling `random.shuffle()` on immutable tuple:<br>`random.shuffle((1, 2, 3))` | `shuffle()` attempts in-place item assignment (`seq[i] = val`), raising `TypeError` on tuples. | Convert tuple to a `list` before shuffling. | `D13-12` |
+
+

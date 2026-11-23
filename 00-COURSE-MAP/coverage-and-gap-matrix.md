@@ -52,18 +52,19 @@
 - **OOP Classes, Instances, Attributes, Dunders, Encapsulation, Properties, UML, Lifecycle:** Resolved by Day 9 slides (`D9-01`–`D9-11`, `D9-EXT-01`–`04`) -> Integrated into Module `12`.
 - **Inheritance, `super()`, MRO & C3 Linearization, Abstract Base Classes, Dataclasses:** Resolved by Day 10 slides (`D10-01`–`D10-15`) -> Integrated into Module `13`.
 - **Polymorphism, Duck Typing, Operator Overloading, __slots__, SRP Design, Lab 11.1 Matrix:** Resolved by Day 11 slides (`D11-01`–`D11-08`) -> Integrated into Module `14`.
+- **Modules Part 1: Imports, `sys.modules`, `sys.path`, `sys`, `math`, `random` & Lab 13.1:** Resolved by Day 13 slides (`D13-01`–`D13-14`) -> Integrated into Module `15`.
 
 ---
 
-## Category D & E — Remaining Advanced Bridges (Days 11–14 Preview)
+## Category D & E — Remaining Advanced Bridges (Days 14+ Preview)
 
-- **File I/O & Context Managers (`with open(...)`):** Standard library file operations (Week 2 Day 11+).
-- **Advanced Decorators & Closures:** Previewed on Day 9 slide `D9-10` ("@property is a decorator — Day 11 shows how decorators work").
-- **Package Architecture & `__init__.py`:** Multi-file packaging and distribution.
+- **Modules Part 2, Packages & `__init__.py`:** Multi-file package architecture, relative imports (`.`, `..`), and distribution.
+- **File I/O & Context Managers (`with open(...)`):** Standard library file operations, text vs binary modes, encoding.
+- **Advanced Decorators & Closures:** Function decorators with arguments, `@wraps`.
 
 ---
 
-## Category F â€” High-Yield Examination Traps (`10-EXAM-PREPARATION`)
+## Category F — High-Yield Examination Traps (`10-EXAM-PREPARATION`)
 
 1. `n = 1,000,000` creating tuple `(1, 0, 0)` (`IMG-09`)
 2. `-2 ** 2 == -4` and right-associative `2 ** 3 ** 2 == 512` (`IMG-10`, `IMG-30`)
@@ -77,7 +78,12 @@
 10. `1 + 2 << 1 == 6` (`+` binds tighter than `<<`) & `~12 == -13` (`IMG-13`, `IMG-14`)
 11. `range(n)` built once at loop start; `i += 10` overwritten next pass; `break` skips `else` (`IMG-41`, `IMG-44`)
 12. `"xyzzy".lstrip("xy") == "zzy"`, `"they're".title() == "They'Re"`, `"-42".zfill(5) == "-0042"`, `"hi".center(7, "*") == "***hi**"`, `"a\tb".expandtabs(4) == "a   b"` (`IMG-60`)
-13. `"class".isidentifier() == True`, `"Â½".isnumeric() == True` vs `isdigit() == False`, `"{} {0}".format(1, 2)` -> `ValueError` (`IMG-76`)
+13. `"class".isidentifier() == True`, `"½".isnumeric() == True` vs `isdigit() == False`, `"{} {0}".format(1, 2)` -> `ValueError` (`IMG-76`)
 14. `sum(gen), sum(gen) -> 91 0` (exhaustion) (`IMG-54`)
 15. `a = a.sort()` overwriting `a` with `None` (`IMG-71`)
 16. `[[0] * 3] * 3` row aliasing & `a.copy()` sharing nested lists (`IMG-74`, `IMG-79`)
+17. CWD module shadowing masking standard library `random` / `math` (`D13-04, D13-05`)
+18. `from math import *` clobbering 3-argument built-in `pow(2, 3, 5)` (`D13-03, D13-05`)
+19. `math.floor(-2.5) == -3` vs `math.trunc(-2.5) == -2` vs `round(-2.5) == -2` (`D13-07, D13-14`)
+20. `random.randint(1, 3)` inclusive upper bound vs `random.randrange(1, 3)` exclusive upper bound (`D13-10, D13-14`)
+21. `random.shuffle((1, 2, 3))` raising `TypeError` on immutable tuple (`D13-12`)

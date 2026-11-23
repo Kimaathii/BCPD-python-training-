@@ -923,5 +923,101 @@ print(combine(["ab", [1, 2], {"x": 1, "y": 2, "z": 3}]))
 - **Correct Answer: B** `[Course: D11-03]`
 - **Analysis:** Duck typing allows any object that implements `__len__` to be passed to `len()`. The lengths are `2` (string), `2` (list), and `3` (dict), summing to `2 + 2 + 3 = 7`.
 
+---
+
+## Part 12: Modules, `sys`, `math` & `random` Traps (Day 13)
+
+### Question T-54: Current Working Directory Module Shadowing
+A developer creates a file named `random.py` containing a function `def test(): pass`. In the same directory, another file `app.py` runs:
+```python
+import random
+print(random.randint(1, 10))
+```
+What is the outcome when executing `python app.py`?
+- A) Successfully prints a random integer between 1 and 10.
+- B) Raises `AttributeError: module 'random' has no attribute 'randint'`.
+- C) Silently imports both files and merges their namespaces.
+- D) Raises `SyntaxError: duplicate module name`.
+- **Correct Answer: B** `[Course: D13-04, D13-05]`
+- **Analysis:** Python resolves modules using `sys.path`. Since `sys.path[0]` is the directory containing the running script (`app.py`), Python imports the local `./random.py` instead of the standard library module. Because the local file does not define `randint`, an `AttributeError` is raised.
+
+---
+
+### Question T-55: Star Import Overwriting Built-in 3-Argument `pow()`
+What occurs when executing:
+```python
+from math import *
+val = pow(2, 3, 5)
+```
+- A) `val` is assigned `3` ($2^3 \pmod 5 = 8 \pmod 5 = 3$).
+- B) Raises `TypeError: pow() takes 2 positional arguments but 3 were given`.
+- C) `val` is assigned `8.0`.
+- D) Raises `ValueError`.
+- **Correct Answer: B** `[Course: D13-03, D13-05]`
+- **Analysis:** Python's built-in `pow(base, exp, mod)` accepts an optional 3rd argument for modulo arithmetic. However, `from math import *` imports `math.pow(x, y)`, which accepts **strictly two arguments** and returns a `float`. The star import clobbers the built-in function, causing a `TypeError`.
+
+---
+
+### Question T-56: Negative Rounding Direction
+What is printed by:
+```python
+import math
+print(math.floor(-3.2), math.trunc(-3.2))
+```
+- A) `-3 -3`
+- B) `-4 -3`
+- C) `-3 -4`
+- D) `-4 -4`
+- **Correct Answer: B** `[Course: D13-07, D13-14]`
+- **Analysis:** `math.floor(x)` rounds down towards negative infinity ($-\infty$), so $-3.2 \to -4$. `math.trunc(x)` truncates fractional digits towards zero, so $-3.2 \to -3$. Both functions return an `int`.
+
+---
+
+### Question T-57: Return Type of `math.pow` vs `**`
+What is the output of:
+```python
+import math
+a = 4 ** 2
+b = math.pow(4, 2)
+print(type(a) == type(b), a == b)
+```
+- A) `True True`
+- B) `False True`
+- C) `False False`
+- D) `True False`
+- **Correct Answer: B** `[Course: D13-07]`
+- **Analysis:** `4 ** 2` performs integer exponentiation, producing integer `16` (`type(a)` is `int`). `math.pow(4, 2)` always casts operands to C doubles and returns float `16.0` (`type(b)` is `float`). Thus `type(a) == type(b)` is `False`, but numerical equality `16 == 16.0` is `True`.
+
+---
+
+### Question T-58: Range Upper Boundary: `randint` vs `randrange`
+Which expression can possibly return the integer `10`?
+- A) `random.randrange(1, 10)`
+- B) `random.randint(1, 10)`
+- C) `random.choice(range(1, 10))`
+- D) `int(random.random() * 10)`
+- **Correct Answer: B** `[Course: D13-10, D13-14]`
+- **Analysis:** In `random.randint(a, b)`, both endpoints are inclusive, so `10` is an allowed return value. In contrast, `randrange(1, 10)`, `range(1, 10)`, and `random.random() * 10` strictly exclude the upper bound `10`.
+
+---
+
+### Question T-59: Return Value of `sys.stdout.write()` & In-Place Shuffle of Tuples
+What is printed by:
+```python
+import sys, random
+ret = sys.stdout.write("OK\n")
+try:
+    random.shuffle((1, 2, 3))
+except TypeError:
+    print(ret)
+```
+- A) `OK` followed by `None`
+- B) `OK` followed by `3`
+- C) `OK` followed by `2`
+- D) `TypeError: stdout.write does not accept newlines`
+- **Correct Answer: B** `[Course: D13-12]`
+- **Analysis:** 1) `sys.stdout.write("OK\n")` writes `'O'`, `'K'`, `'\n'` to stdout and returns the character count `3`. 2) `random.shuffle()` attempts in-place mutation (`__setitem__`), which fails on immutable tuples raising `TypeError`. 3) The `except` block catches the error and prints `ret`, which is `3`.
+
+
 
 

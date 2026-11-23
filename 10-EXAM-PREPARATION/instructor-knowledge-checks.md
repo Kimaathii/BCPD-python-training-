@@ -570,4 +570,54 @@ class Dog:
 - **Correct Answer:** **B** `[Course: D11-08]`
 - **Explanation:** SRP states that each class should be responsible for a single part of software functionality (e.g. data modeling separate from database persistence or email reporting), ensuring modularity and low coupling.
 
+---
+
+## Day 13 Knowledge Check: Modules Part 1 — Imports, sys, math & random `[Course: D13-14]`
+
+### Question 13.1 (Official Classroom Quiz)
+**Which import style is discouraged because it pollutes the namespace?**
+- A) `import math`
+- B) `from math import sqrt`
+- C) `from math import *`
+- D) `import math as m`
+- **Correct Answer:** **C** `[Course: D13-14]`
+- **Explanation:** `from module import *` dumps all public names from the imported module directly into the current namespace. This obscures the origin of variables and functions and frequently causes accidental name collisions (such as `math.pow` clobbering Python's built-in 3-argument `pow()`).
+
+### Question 13.2 (Official Classroom Quiz)
+**What is `__name__` inside `app.py` when you run `python app.py`?**
+- A) `'app'`
+- B) `'__main__'`
+- C) `'app.py'`
+- D) `None`
+- **Correct Answer:** **B** `[Course: D13-14]`
+- **Explanation:** When Python runs a file directly as the entry point of execution, CPython automatically sets its `__name__` attribute to `'__main__'`. If `app.py` is imported by another module, its `__name__` evaluates to `'app'`.
+
+### Question 13.3 (Official Classroom Quiz)
+**Which values can `random.randint(1, 3)` return?**
+- A) 1 or 2
+- B) 0 to 3
+- C) Any float from 1 to 3
+- D) 1, 2 or 3
+- **Correct Answer:** **D** `[Course: D13-14]`
+- **Explanation:** Unlike `range(a, b)` and `random.randrange(a, b)` where the upper bound $b$ is strictly excluded, `random.randint(a, b)` includes **both** endpoints $a$ and $b$ inclusive. Hence, it can return 1, 2, or 3.
+
+### Question 13.4 (Official Classroom Quiz)
+**Output of `import math; print(math.floor(-2.5))`?**
+- A) -2
+- B) -3
+- C) -2.5
+- D) -3.0
+- **Correct Answer:** **B** `[Course: D13-14]`
+- **Explanation:** `math.floor(x)` rounds downward towards negative infinity. On the number line, the greatest integer less than or equal to $-2.5$ is $-3$. In Python 3, `math.floor()` returns an `int`, not a `float`.
+
+### Question 13.5 (Official Classroom Quiz)
+**What is `sys.argv[0]`?**
+- A) The script name
+- B) The first argument after the script
+- C) The Python version
+- D) The exit code
+- **Correct Answer:** **A** `[Course: D13-14]`
+- **Explanation:** `sys.argv[0]` is always the script name or path invoked on the command line. Command-line arguments passed to the script start at index 1 (`sys.argv[1]`).
+
+
 
