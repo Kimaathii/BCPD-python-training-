@@ -195,12 +195,23 @@ def test_level_3() -> None:
     print("Level 3 Tests: PASSED")
 
 
+def reformat_iso_dates_to_uk(text: str) -> str:
+    """Rewrite all YYYY-MM-DD dates in a paragraph to DD/MM/YYYY [Course: D14-14]."""
+    date_pat = r"(\d{4})-(\d{2})-(\d{2})"
+    return re.sub(date_pat, r"\3/\2/\1", text)
+
+
 def test_level_4() -> None:
     # Phone validation
     assert Lab14Validator.validate_nigerian_phone("+2348012345678") is True
     assert Lab14Validator.validate_nigerian_phone("08012345678") is True
     assert Lab14Validator.validate_nigerian_phone("0801-234-5678") is True
     assert Lab14Validator.validate_nigerian_phone("0123456789") is False
+
+    # Date rewrite substitution [Course: D14-14]
+    sample_text = "Due 2026-11-13, resit 2026-11-20."
+    rewritten = reformat_iso_dates_to_uk(sample_text)
+    assert rewritten == "Due 13/11/2026, resit 20/11/2026."
 
     # Bank SMS Alert
     sms = "Acct:***4521 DR: NGN5,000.00 Desc: POS/IKEJA Bal: NGN42,350.75"
@@ -228,11 +239,37 @@ def test_level_4() -> None:
     print("Level 4 (Lab 14.1) Tests: PASSED")
 
 
+def test_level_5_classroom_knowledge_check() -> None:
+    """Verify official Classroom Knowledge Check [Course: D14-15]."""
+    # Q1: print(re.match(r"\d", "a1"))
+    q1_result = re.match(r"\d", "a1")
+    assert q1_result is None
+
+    # Q2: Pattern matching one or more digits
+    assert bool(re.fullmatch(r"\d+", "12345")) is True
+    assert bool(re.fullmatch(r"\d+", "")) is False
+
+    # Q3: re.findall(r"(\w)(\d)", "a1 b2")
+    q3_result = re.findall(r"(\w)(\d)", "a1 b2")
+    assert q3_result == [("a", "1"), ("b", "2")]
+
+    # Q4: strftime minute code
+    t_min = datetime(2026, 11, 25, 14, 45, 0)
+    assert t_min.strftime("%M") == "45"
+    assert t_min.strftime("%m") == "11"  # %m is month!
+
+    # Q5: date(2026, 1, 31) + timedelta(days=1)
+    q5_result = date(2026, 1, 31) + timedelta(days=1)
+    assert q5_result == date(2026, 2, 1)
+    print("Level 5 (Classroom Knowledge Check Q1-Q5): PASSED")
+
+
 def run_all_tests() -> None:
     test_level_1()
     test_level_2()
     test_level_3()
     test_level_4()
+    test_level_5_classroom_knowledge_check()
     print("\n" + "=" * 60)
     print("✅ ALL MODULE 16 EXERCISES & LAB 14.1 PASSED DETERMINISTICALLY")
     print("=" * 60)

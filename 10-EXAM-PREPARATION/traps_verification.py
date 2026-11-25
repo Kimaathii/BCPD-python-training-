@@ -7,8 +7,12 @@ Purpose: Programmatically asserts the exact CPython behavior for all traps docum
 from abc import ABC, abstractmethod
 from collections import Counter, defaultdict, namedtuple
 from dataclasses import dataclass, field
+from datetime import date, datetime, timedelta, timezone
 from functools import singledispatch
+import io
 import math
+import random
+import re
 import sys
 
 
@@ -514,6 +518,71 @@ def test_domain_15_modules_sys_math_random():
     assert captured.getvalue() == "ABC\n"
 
 
+def test_domain_16_regex_datetime_traps():
+    # Trap 16.1: Greedy vs Lazy
+    assert re.findall(r"<.+>", "<b>bold</b><i>it</i>") == ["<b>bold</b><i>it</i>"]
+    assert re.findall(r"<.+?>", "<b>bold</b><i>it</i>") == ["<b>", "</b>", "<i>", "</i>"]
+
+    # Trap 16.2: findall multiple groups returns list of tuples
+    assert re.findall(r"(\w+) (\d+)", "cat 3 dog 12") == [("cat", "3"), ("dog", "12")]
+
+    # Trap 16.3: re.match requires match at index 0
+    assert re.match(r"\d+", "Order 66") is None
+    assert re.search(r"\d+", "Order 66") is not None
+
+    # Trap 16.4: strftime %M (minute) vs %m (month)
+    dt = datetime(2026, 11, 24, 14, 30, 0)
+    assert dt.strftime("%Y-%m-%d") == "2026-11-24"
+    assert dt.strftime("%Y-%M-%d") == "2026-30-24"
+
+    # Trap 16.5: timedelta.seconds is remainder mod 86400, not cumulative
+    td = timedelta(days=2, seconds=10)
+    assert td.seconds == 10
+    assert td.total_seconds() == 172810.0
+
+    # Trap 16.6: Dynamic regex pattern injection requires re.escape
+    escaped = re.escape("1+1=2")
+    assert bool(re.search(escaped, "Math: 1+1=2")) is True
+
+    # Trap 16.7: weekday() Mon=0 vs isoweekday() Mon=1 [Course: D14-12]
+    d = date(2026, 11, 13)  # Friday
+    assert d.weekday() == 4
+    assert d.isoweekday() == 5
+
+    # Trap 16.8: timedelta has NO .hours attribute [Course: D14-12]
+    td_hours = timedelta(hours=36)
+    assert hasattr(td_hours, "hours") is False
+    assert (td_hours.days, td_hours.seconds) == (1, 43200)
+
+    # Trap 16.9: Leading zero integer literals cause SyntaxError [Course: D14-12]
+    try:
+        compile("date(2026, 11, 09)", "<string>", "eval")
+        syntax_err = False
+    except SyntaxError:
+        syntax_err = True
+    assert syntax_err is True
+
+
+def test_domain_17_numpy_traps():
+    # Trap 17.1: arange excludes stop vs linspace includes stop [Course: D15-03]
+    # Pure-python / numpy parity check
+    arange_step = list(range(0, 10, 2))  # [0, 2, 4, 6, 8]
+    assert arange_step[-1] == 8
+
+    # Linspace(0, 10, 5) -> [0.0, 2.5, 5.0, 7.5, 10.0]
+    linspace_samples = [0.0 + i * (10.0 / 4) for i in range(5)]
+    assert linspace_samples[-1] == 10.0
+
+    try:
+        import numpy as np
+        a = np.arange(0, 10, 2)
+        b = np.linspace(0, 10, 5)
+        assert a[-1] == 8
+        assert b[-1] == 10.0
+    except ImportError:
+        pass
+
+
 def main():
     print("Running Master Exam Traps Verification Suite...")
     test_domain_1_syntax_and_env()
@@ -531,7 +600,9 @@ def main():
     test_domain_13_inheritance_and_mro()
     test_domain_14_polymorphism_and_design()
     test_domain_15_modules_sys_math_random()
-    print("All 54+ Exam Traps rigorously verified and PASSED against CPython runtime.")
+    test_domain_16_regex_datetime_traps()
+    test_domain_17_numpy_traps()
+    print("All 65+ Exam Traps rigorously verified and PASSED against CPython runtime.")
 
 
 if __name__ == "__main__":

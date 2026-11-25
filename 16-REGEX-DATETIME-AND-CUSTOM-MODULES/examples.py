@@ -161,11 +161,11 @@ def demonstrate_re_tools() -> None:
 
 
 # ------------------------------------------------------------------------------
-# 5. Slide D14-07: Named Groups & Greedy vs. Lazy Matching
+# 5. Slide D14-07 & D14-08: Groups, Named Groups, Greedy vs Lazy & Advanced re
 # ------------------------------------------------------------------------------
 def demonstrate_groups_and_greediness() -> None:
     print("\n" + "=" * 60)
-    print("5. GROUPS & GREEDY VS LAZY [Course: D14-07]")
+    print("5. GROUPS, NAMED GROUPS, GREEDY VS LAZY & ADVANCED RE [Course: D14-07, D14-08]")
     print("=" * 60)
 
     # Named capture groups and groupdict
@@ -193,46 +193,121 @@ def demonstrate_groups_and_greediness() -> None:
     assert greedy_tags == ["<b>bold</b><i>it</i>"]
     assert lazy_tags == ["<b>", "</b>", "<i>", "</i>"]
 
+    # --- Verbatim re_more.py [Course: D14-08] ---
+    # Capturing group in split retains delimiters
+    split_with_delim = re.split(r"(,)", "a,b,c")
+    assert split_with_delim == ["a", ",", "b", ",", "c"]
+
+    # re.subn returns (new_string, number_of_subs_made)
+    subn_res, subn_count = re.subn(r"\d", "#", "a1b22")
+    assert (subn_res, subn_count) == ("a#b##", 3)
+
+    # count parameter limits replacements
+    sub_count1 = re.sub(r"\d", "#", "a1b22", count=1)
+    assert sub_count1 == "a#b22"
+
+    # Positive lookahead (?=...)
+    lookahead_matches = re.findall(r"\w+(?=@)", "ada@x.org bo@y.ng")
+    assert lookahead_matches == ["ada", "bo"]
+
+    # Non-word boundary \B
+    b_matches = re.findall(r"\Bcat", "cat concat")
+    assert b_matches == ["cat"]  # matches "cat" inside "concat"
+
+    # Compiled groupindex mapping
+    p = re.compile(r"(?P<y>\d{4})-(?P<m>\d\d)")
+    assert p.groupindex == {"y": 1, "m": 2}
+
+    # Malformed pattern raises re.error
+    try:
+        re.compile(r"(unclosed")
+        re_error_caught = False
+    except re.error:
+        re_error_caught = True
+    assert re_error_caught is True
+
+    # Failed match returns None
+    assert re.match(r"x", "abc") is None
+    print("re_more.py Verbatim Checks: PASSED")
+
 
 # ------------------------------------------------------------------------------
-# 6. Slide D14-01: time & datetime Module Operations
+# 6. Slides D14-09, D14-10, D14-11, D14-12: Time, DateTime & Exam Traps
 # ------------------------------------------------------------------------------
 def demonstrate_time_and_datetime() -> None:
     print("\n" + "=" * 60)
-    print("6. TIME & DATETIME MODULE OPERATIONS [Course: D14-01]")
+    print("6. TIME & DATETIME OPERATIONS [Course: D14-09, D14-10, D14-11, D14-12]")
     print("=" * 60)
 
-    # 1. Monotonic high-resolution timing
-    t0 = time.perf_counter()
-    time.sleep(0.005)
-    elapsed = time.perf_counter() - t0
-    assert elapsed > 0
-    print(f"perf_counter elapsed: {elapsed:.6f}s")
+    # --- Verbatim time_demo.py [Course: D14-09] ---
+    start = time.perf_counter()
+    time.sleep(0.005)  # small pause for testing
+    elapsed = time.perf_counter() - start
+    assert elapsed >= 0.001
+    assert type(time.time()).__name__ == "float"
 
-    # 2. Four datetime classes
-    d = date(2026, 12, 5)
-    t = datetime.strptime("14:30:00", "%H:%M:%S").time()
-    dt = datetime.combine(d, t)
-    print(f"Combined datetime: {dt.isoformat()}")
+    t = time.strptime("2026-10-29", "%Y-%m-%d")
+    assert (t.tm_year, t.tm_mon, t.tm_wday) == (2026, 10, 3)
+    assert time.strftime("%d/%m/%Y", t) == "29/10/2026"
+    print("time_demo.py Verbatim Checks: PASSED")
 
-    # 3. timedelta arithmetic
-    future = dt + timedelta(days=2, hours=3)
-    print(f"future datetime: {future}")
-    assert future == datetime(2026, 12, 7, 17, 30, 0)
+    # --- Verbatim dates.py [Course: D14-11] ---
+    dt = datetime(2026, 10, 29, 14, 5)
+    formatted = dt.strftime("%A %d %B %Y, %H:%M")
+    assert formatted == "Thursday 29 October 2026, 14:05"
 
-    # 4. strftime vs strptime
-    fmt_str = "%Y-%m-%d %H:%M:%S"
-    formatted = dt.strftime(fmt_str)
-    assert formatted == "2026-12-05 14:30:00"
-    re_parsed = datetime.strptime(formatted, fmt_str)
-    assert re_parsed == dt
-    print("strftime & strptime: VERIFIED")
+    parsed = datetime.strptime("04/12/2026", "%d/%m/%Y")
+    assert parsed.date() == date(2026, 12, 4)
+    diff = parsed - dt
+    assert diff.days == 35
 
-    # 5. timedelta.seconds vs .total_seconds() trap
-    span = timedelta(days=1, seconds=30)
-    assert span.seconds == 30  # remainder only!
-    assert span.total_seconds() == 86430.0  # full duration!
-    print("timedelta total_seconds vs seconds trap: VERIFIED")
+    assert date(2026, 10, 29) + timedelta(weeks=1) == date(2026, 11, 5)
+    age = date(2026, 10, 29) - date(2000, 3, 15)
+    assert age.days // 365 == 26
+    assert date(2026, 10, 29).isoformat() == "2026-10-29"
+    print("dates.py Verbatim Checks: PASSED")
+
+    # --- Verbatim dates_more.py & Exam Traps [Course: D14-12] ---
+    d = date(2026, 11, 13)
+    # TRAP: weekday() is Monday=0, isoweekday() is Monday=1!
+    assert (d.weekday(), d.isoweekday()) == (4, 5)
+
+    gap = date(2026, 12, 25) - d
+    assert gap.days == 42
+    # TRAP: timedelta has NO .hours attribute!
+    assert hasattr(gap, "hours") is False
+
+    td = timedelta(hours=36)
+    assert (td.days, td.seconds) == (1, 43200)
+
+    t_local = time.localtime()
+    assert t_local[0] == t_local.tm_year
+
+    s_time = time.strptime("2026-11-13", "%Y-%m-%d")
+    assert time.asctime(s_time) == "Fri Nov 13 00:00:00 2026"
+
+    from datetime import timezone
+    assert datetime.now(timezone.utc).tzinfo == timezone.utc
+    print("dates_more.py Verbatim Checks & Traps: PASSED")
+
+
+# ------------------------------------------------------------------------------
+# 7. Slide D14-13: Creating Your Own Module (__name__ == "__main__")
+# ------------------------------------------------------------------------------
+def demonstrate_custom_module_mechanics() -> None:
+    print("\n" + "=" * 60)
+    print("7. CUSTOM MODULE EXECUTION GUARD [Course: D14-13]")
+    print("=" * 60)
+
+    # Emulate geometry.py mechanics
+    PI = 3.14159
+
+    def circle_area(r: float) -> float:
+        return PI * r * r
+
+    assert round(circle_area(1), 5) == 3.14159
+    assert round(circle_area(2), 5) == 12.56636
+    print("geometry.py area calculations: VERIFIED")
 
 
 def run_all_module_16_examples() -> None:
@@ -242,6 +317,7 @@ def run_all_module_16_examples() -> None:
     demonstrate_re_tools()
     demonstrate_groups_and_greediness()
     demonstrate_time_and_datetime()
+    demonstrate_custom_module_mechanics()
     print("\n" + "=" * 60)
     print("✅ ALL MODULE 16 EXAMPLES EXECUTED SUCCESSFULLY")
     print("=" * 60)

@@ -136,6 +136,12 @@ class ExamCountdownTimer:
         }
 
 
+def reformat_iso_dates_to_uk(text: str) -> str:
+    """Rewrite all YYYY-MM-DD dates in a paragraph to DD/MM/YYYY [Course: D14-14]."""
+    date_pat = r"(\d{4})-(\d{2})-(\d{2})"
+    return re.sub(date_pat, r"\3/\2/\1", text)
+
+
 def main() -> None:
     # Level 1 verification
     assert is_valid_hex_color("#FFF") is True
@@ -155,6 +161,7 @@ def main() -> None:
 
     # Level 4 verification
     assert Lab14Validator.validate_nigerian_phone("+2348012345678") is True
+    assert reformat_iso_dates_to_uk("Due 2026-11-13, resit 2026-11-20.") == "Due 13/11/2026, resit 20/11/2026."
     sms = "Acct:***4521 DR: NGN5,000.00 Desc: POS/IKEJA Bal: NGN42,350.75"
     alert = Lab14Validator.parse_bank_alert(sms)
     assert alert is not None and alert["amount"] == 5000.0
@@ -162,6 +169,13 @@ def main() -> None:
     timer = ExamCountdownTimer("2026-12-05 09:00:00")
     rem = timer.get_remaining_time(datetime(2026, 12, 1, 9, 0, 0))
     assert rem["days"] == 4 and rem["is_expired"] is False
+
+    # Level 5 Classroom Knowledge Check verification [Course: D14-15]
+    assert re.match(r"\d", "a1") is None
+    assert bool(re.fullmatch(r"\d+", "99")) is True
+    assert re.findall(r"(\w)(\d)", "a1 b2") == [("a", "1"), ("b", "2")]
+    assert datetime(2026, 11, 25, 14, 45).strftime("%M") == "45"
+    assert date(2026, 1, 31) + timedelta(days=1) == date(2026, 2, 1)
 
     print("Module 16 solutions self-test PASSED.")
 

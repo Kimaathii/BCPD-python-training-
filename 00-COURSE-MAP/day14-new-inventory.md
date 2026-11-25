@@ -2,8 +2,8 @@
 **Class Date:** Tuesday 24 Nov 2026 (Week 3, Day 14)  
 **Subject:** Modules Part 2: `re`, `time`, `datetime`, own modules  
 **BCPD Exam Weight:** Domain 4 · Modules & Libraries (15%)  
-**Student Manual Mapping:** Day 15 · §15.1–15.4  
-**Image Files Staged:** 8 JPEG files (`WhatsApp Image 2026-11-24 at 21.56.53.jpeg` to `21.57.00.jpeg`)  
+**Student Manual Mapping:** Day 15 · §15.1–15.5  
+**Image Files Staged:** 16 JPEG files (Nov 24 batch: `21.56.53.jpeg` to `21.57.00.jpeg`; Nov 25 completion batch: `22.30.28.jpeg`, `22.30.29.jpeg`, `22.33.56.jpeg`, `22.33.56l.jpeg`, `22.33.56lo.jpeg`, `22.33.57.jpeg`, `22.33.57ki.jpeg`, `22.33.57op.jpeg`, `22.33.58.jpeg`, `22.33.58m.jpeg`)  
 **Curriculum Mapping:** Module 16 (`16-REGEX-DATETIME-AND-CUSTOM-MODULES`) & Central Exam Prep Hub (`10-EXAM-PREPARATION/`)
 
 ---
@@ -19,6 +19,14 @@
 | `[Course: D14-05]` | `21.56.58.jpeg` | `re.compile` & flags (§15.1) | `re_flags.py`, `re.I`, `re.M`, `re.S`, `re.X`, `re.escape()` | `16-REGEX-DATETIME-AND-CUSTOM-MODULES/README.md`, `examples.py` |
 | `[Course: D14-06]` | `21.56.59.jpeg` | `findall`, `finditer`, `sub` & `split` (§15.1) | `re_tools.py`, scalar vs group tuple return, backreferences `\1`, `\2` | `16-REGEX-DATETIME-AND-CUSTOM-MODULES/README.md`, `examples.py` |
 | `[Course: D14-07]` | `21.57.00.jpeg` | Groups, named groups & greedy matching (§15.1) | `re_groups.py`, `(?P<name>...)`, `groupdict()`, greedy (`.+`) vs lazy (`.+?`) | `16-REGEX-DATETIME-AND-CUSTOM-MODULES/README.md`, Traps 55–56 |
+| `[Course: D14-08]` | `22.30.28.jpeg` | More `re` tools: split, subn, lookahead & errors (§15.1) | `re_more.py`, capturing groups in split, `re.subn`, `(?=...)`, `\b`/`\B`, `re.error` | `16-REGEX-DATETIME-AND-CUSTOM-MODULES/README.md`, `examples.py` |
+| `[Course: D14-09]` | `22.30.29.jpeg` | The `time` module (§15.2) | `time_demo.py`, `perf_counter()`, `struct_time`, `strftime`/`strptime`, `tm_wday` | `16-REGEX-DATETIME-AND-CUSTOM-MODULES/README.md`, `examples.py` |
+| `[Course: D14-10]` | `22.33.58.jpeg` | `datetime`: the four classes (§15.3) | `date`, `time`, `datetime`, `timedelta` properties, constructors & methods | `16-REGEX-DATETIME-AND-CUSTOM-MODULES/README.md` |
+| `[Course: D14-11]` | `22.33.58m.jpeg` | `datetime`: formatting, parsing & arithmetic (§15.3) | `dates.py`, `strftime` codes (`%A`, `%B`, `%d`, `%Y`, `%H:%M`), `strptime` `ValueError`, `timedelta` math | `16-REGEX-DATETIME-AND-CUSTOM-MODULES/README.md`, `examples.py` |
+| `[Course: D14-12]` | `22.33.57op.jpeg` | Dates & times: exam details (§15.3–§15.5) | `dates_more.py`, `weekday()` vs `isoweekday()`, leading zeros syntax error, `timedelta` attributes, `utcnow()` | `16-REGEX-DATETIME-AND-CUSTOM-MODULES/README.md`, Traps 61–63 |
+| `[Course: D14-13]` | `22.33.56lo.jpeg`, `22.33.57ki.jpeg` | Creating your own module (§15.4) | `geometry.py`, `main.py`, `__name__ == "__main__"`, `import geometry`, `from geometry import circle_area` | `16-REGEX-DATETIME-AND-CUSTOM-MODULES/README.md`, `examples.py` |
+| `[Course: D14-14]` | `22.33.56l.jpeg`, `22.33.57.jpeg` | Lab 14.1 — Validators & a countdown timer (§15.5) | `validate.py`, compiled `PHONE`, date substitution `re.sub()`, `exam - now` timedelta countdown | `16-REGEX-DATETIME-AND-CUSTOM-MODULES/exercises.py`, solutions |
+| `[Course: D14-15]` | `22.33.56.jpeg` | Knowledge check (Assessment) | 5 exam-style MCQs: `re.match`, `\d+`, `findall` groups, `strftime` `%M` vs `%m`, calendar date rollover | `16-REGEX-DATETIME-AND-CUSTOM-MODULES/README.md`, `exercises.py` |
 
 ---
 
@@ -174,31 +182,227 @@
 
 ---
 
-## 3. Supplementary Syllabus Topics Transcribed from Agenda (`D14-01`)
+## 3. Verbatim Code & Content Transcriptions: Slides D14-08 to D14-15
 
-### §15.2 The `time` Module & Exam Details
-- `time.time()`: Returns current Unix epoch time in seconds as float. (Subject to wall-clock adjustment).
-- `time.sleep(secs)`: Suspends execution of current thread for `secs` seconds (float or int).
-- `time.perf_counter()`: High-resolution monotonic clock with smallest available sleep/interval resolution, immune to system time updates.
+### Slide `D14-08`: More `re` tools: split, subn, lookahead & errors (Manual §15.1)
+- **Source File:** `WhatsApp Image 2026-11-25 at 22.30.28.jpeg` (Slide 8)
+- **Side Cards:**
+  - *Groups in split:* A capturing group keeps the separators in the result.
+  - *subn and count:* `subn` returns `(new_string, count)`; `count=` limits replacements.
+  - *Zero-width:* `(?=...)` lookahead, `\b` / `\B` boundaries, `\A` / `\Z` string start and end.
+  - *Error vs no match:* A bad pattern raises `re.error`; a failed match just returns `None`.
+- **Verbatim Code (`re_more.py`):**
+```python
+import re
 
-### §15.3 The `datetime` Module: Classes, Formatting & Arithmetic
-- **The Four Classes:**
-  1. `datetime.date(year, month, day)`: Gregorian calendar date.
-  2. `datetime.time(hour, minute, second, microsecond)`: Wall-clock time independent of date.
-  3. `datetime.datetime(year, month, day, hour, minute, second)`: Combined date and time.
-  4. `datetime.timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)`: Duration / delta between timestamps.
-- **Formatting & Parsing:**
-  - `dt.strftime(format)`: Format object to string (`%Y-%m-%d %H:%M:%S`).
-  - `datetime.strptime(date_string, format)`: Parse string to datetime object.
-- **Exam Pitfalls:**
-  - `timedelta` only internally stores `days`, `seconds`, and `microseconds`.
-  - `timedelta(days=1, seconds=10).seconds` == `10`, whereas `.total_seconds()` == `86410.0`.
+print(re.split(r"(,)", "a,b,c"))
+# -> ['a', ',', 'b', ',', 'c']
+print(re.split(r";", "abc"))
+# -> ['abc']
+print(re.subn(r"\d", "#", "a1b22"))
+# -> ('a#b##', 3)
+print(re.sub(r"\d", "#", "a1b22", count=1))
+# -> a#b22
+print(re.findall(r"\w+(?=@)", "ada@x.org bo@y.ng"))
+# -> ['ada', 'bo']
+print(re.findall(r"\Bcat", "cat concat"))
+# -> ['cat']
+p = re.compile(r"(?P<y>\d{4})-(?P<m>\d\d)")
+print(p.groupindex)
+# -> {'y': 1, 'm': 2}
+try:
+    re.compile(r"(unclosed")
+except re.error:
+    print("re.error")
+# -> re.error
+print(re.match(r"x", "abc"))
+# -> None
+```
 
-### §15.4 Creating Your Own Module & `if __name__ == "__main__":`
-- Module file naming and import mechanics.
-- Top-level execution on first import.
-- Guarding execution scripts vs reusable library modules with `if __name__ == "__main__":`.
+---
 
-### Lab 14.1 — Validators & a Countdown Timer
-- **Part A:** Building input validation routines (Email, Phone, Transaction SMS parsing) using compiled regular expressions.
-- **Part B:** Building an event countdown timer calculating days, hours, minutes, and seconds until the BCPD exam using `datetime.now()` and `timedelta`.
+### Slide `D14-09`: The `time` module (Manual §15.2)
+- **Source File:** `WhatsApp Image 2026-11-25 at 22.30.29.jpeg` (Slide 9)
+- **Core Principles:**
+  - `time.time()` — seconds since the epoch (1 Jan 1970 UTC) as a float.
+  - `time.sleep(s)` pauses; `time.perf_counter()` times code precisely.
+  - `time.localtime()` / `time.gmtime()` return a `struct_time`.
+  - `time.strftime(fmt, t)` formats; `time.strptime(text, fmt)` parses.
+  - `tm_wday` counts Monday as `0`.
+- **Verbatim Code (`time_demo.py`):**
+```python
+import time
+
+start = time.perf_counter()
+time.sleep(0.1)
+elapsed = time.perf_counter() - start
+print(elapsed >= 0.1)
+# -> True
+
+t = time.strptime("2026-10-29", "%Y-%m-%d")
+print(t.tm_year, t.tm_mon, t.tm_wday)
+# -> 2026 10 3
+print(time.strftime("%d/%m/%Y", t))
+# -> 29/10/2026
+print(type(time.time()).__name__)
+# -> float
+```
+
+---
+
+### Slide `D14-10`: `datetime`: the four classes (Manual §15.3)
+- **Source File:** `WhatsApp Image 2026-11-25 at 22.33.58.jpeg` (Slide 10)
+- **Class Reference Table:**
+  | Class | Represents | Create | Useful members |
+  |---|---|---|---|
+  | `date` | A calendar date | `date(2026, 10, 29)`, `date.today()` | `.year`, `.month`, `.day`, `.weekday()` |
+  | `time` | A time of day | `time(14, 30)` | `.hour`, `.minute`, `.second` |
+  | `datetime` | Date and time | `datetime(2026, 10, 29, 14, 30)`, `datetime.now()` | `.date()`, `.time()`, `.strftime()` |
+  | `timedelta` | A duration | `timedelta(days=7, hours=3)` | `.days`, `.seconds`, `.total_seconds()` |
+- **Rule:** *Subtracting two dates gives a `timedelta`; adding a `timedelta` to a date gives a new date.*
+
+---
+
+### Slide `D14-11`: `datetime`: formatting, parsing & arithmetic (Manual §15.3)
+- **Source File:** `WhatsApp Image 2026-11-25 at 22.33.58m.jpeg` (Slide 11)
+- **Directives Reference:**
+  - `strftime codes`: `%Y` year, `%m` month, `%d` day, `%H:%M` time, `%A` weekday name, `%B` month name.
+  - `strptime`: The format must match the text exactly, or you get `ValueError`.
+  - `Arithmetic`: `date + timedelta -> date`; `date - date -> timedelta`.
+- **Verbatim Code (`dates.py`):**
+```python
+from datetime import date, datetime, timedelta
+
+dt = datetime(2026, 10, 29, 14, 5)
+print(dt.strftime("%A %d %B %Y, %H:%M"))
+# -> Thursday 29 October 2026, 14:05
+
+parsed = datetime.strptime("04/12/2026", "%d/%m/%Y")
+print(parsed.date())
+# -> 2026-12-04
+print(parsed - dt)
+# -> 35 days, 9:55:00
+print(date(2026, 10, 29) + timedelta(weeks=1))
+# -> 2026-11-05
+age = date(2026, 10, 29) - date(2000, 3, 15)
+print(age.days // 365)
+# -> 26
+print(date(2026, 10, 29).isoformat())
+# -> 2026-10-29
+```
+
+---
+
+### Slide `D14-12`: Dates & times: exam details (Manual §15.3–§15.5)
+- **Source File:** `WhatsApp Image 2026-11-25 at 22.33.57op.jpeg` (Slide 12)
+- **Core Exam Traps:**
+  - `weekday()`: Monday = `0`; `isoweekday()`: Monday = `1`
+  - Leading zeros such as `09` are a `SyntaxError` — write `9`
+  - `timedelta` stores `days`, `seconds` and `microseconds` — there is no `.hours`
+  - `struct_time` works like a tuple: `t[0]` is the year; `time.asctime()` formats it
+  - `utcnow()` is deprecated — use `datetime.now(timezone.utc)`
+- **Verbatim Code (`dates_more.py`):**
+```python
+from datetime import date, datetime, timedelta, timezone
+import time
+
+d = date(2026, 11, 13)  # Note: date(2026, 11, 09) raises SyntaxError!
+print(d.weekday(), d.isoweekday())
+# -> 4 5
+gap = date(2026, 12, 25) - d
+print(gap.days, hasattr(gap, "hours"))
+# -> 42 False
+td = timedelta(hours=36)
+print(td.days, td.seconds)
+# -> 1 43200
+t = time.localtime()
+print(t[0] == t.tm_year)
+# -> True
+s = time.strptime("2026-11-13", "%Y-%m-%d")
+print(time.asctime(s))
+# -> Fri Nov 13 00:00:00 2026
+print(datetime.now(timezone.utc).tzinfo)
+# -> UTC
+```
+
+---
+
+### Slide `D14-13`: Creating your own module (Manual §15.4)
+- **Source Files:** `WhatsApp Image 2026-11-25 at 22.33.56lo.jpeg`, `22.33.57ki.jpeg` (Slide 13)
+- **Core Principles:**
+  - Any `.py` file is a module; its name is the file name without `.py`.
+  - `__name__` is `"__main__"` when a file is run directly, and the module name when imported.
+  - Put demo or test code under `if __name__ == "__main__":` so it doesn't run on import.
+  - A folder of modules with `__init__.py` is a package (Day 15).
+- **Verbatim Code (`geometry.py` + `main.py`):**
+```python
+# geometry.py
+PI = 3.14159
+
+def circle_area(r):
+    return PI * r * r
+
+if __name__ == "__main__":
+    print("Self-test:", circle_area(1))
+
+# main.py
+import geometry
+from geometry import circle_area
+
+print(geometry.PI)
+print(circle_area(2))
+```
+
+---
+
+### Slide `D14-14`: Lab 14.1 — Validators & a countdown timer (Manual §15.5)
+- **Source Files:** `WhatsApp Image 2026-11-25 at 22.33.56l.jpeg`, `22.33.57.jpeg` (Slide 14)
+- **Lab Requirements:**
+  1. `is_valid_email()` and `is_valid_phone()` (e.g. `+234 801 234 5678`) with compiled patterns; test 5 good, 5 bad.
+  2. Find every `YYYY-MM-DD` date in a paragraph and rewrite them as `DD/MM/YYYY` with `sub` and groups.
+  3. Age calculator: parse a birth date with `strptime` and print the age in years and days.
+  4. Countdown: days, hours and minutes until the Week 3 assessment (`Fri 27 Nov 2026, 14:00`).
+- **Verbatim Classroom Implementation (`validate.py`):**
+```python
+import re
+from datetime import datetime
+
+# 1. Phone validation
+PHONE = re.compile(r"^\+?\d{3}\s?\d{3}\s?\d{3}\s?\d{4}$")
+print(bool(PHONE.match("+234 801 234 5678")))
+# -> True
+
+# 2. Rewrite date format via substitution
+text = "Due 2026-11-13, resit 2026-11-20."
+DATE = r"(\d{4})-(\d{2})-(\d{2})"
+print(re.sub(DATE, r"\3/\2/\1", text))
+# -> Due 13/11/2026, resit 20/11/2026.
+
+# 3. Assessment countdown
+exam = datetime(2026, 11, 13, 14, 0)
+left = exam - datetime(2026, 11, 12, 9, 30)
+print(left)
+# -> 1 day, 4:30:00
+```
+
+---
+
+### Slide `D14-15`: Classroom Knowledge Check (Assessment)
+- **Source File:** `WhatsApp Image 2026-11-25 at 22.33.56.jpeg` (Slide 15)
+- **Questions & Official Solutions:**
+  1. **Q1:** `Output of print(re.match(r"\d", "a1"))?`
+     - Options: `A: A match object`, `B: 1`, `C: None`, `D: a`
+     - **Answer: C (None)**. `re.match()` tests only at the beginning of the string (`'a'` is not a digit).
+  2. **Q2:** `Which pattern matches one or more digits?`
+     - Options: `A: \d*`, `B: \d+`, `C: \d?`, `D: [d]+`
+     - **Answer: B (\d+)**. `+` quantifier matches 1 or more occurrences.
+  3. **Q3:** `What does re.findall(r"(\w)(\d)", "a1 b2") return?`
+     - Options: `A: [('a', '1'), ('b', '2')]`, `B: ['a1', 'b2']`, `C: ['a', 'b']`, `D: None`
+     - **Answer: A ([('a', '1'), ('b', '2')])**. When multiple capturing groups are present, `findall` returns a list of tuples containing the matched groups.
+  4. **Q4:** `In a strftime format, which code gives the minutes?`
+     - Options: `A: %m`, `B: %n`, `C: %M`, `D: %I`
+     - **Answer: C (%M)**. `%M` represents minutes (00–59), while `%m` represents month (01–12).
+  5. **Q5:** `Output of print(date(2026, 1, 31) + timedelta(days=1))?`
+     - Options: `A: 2026-01-32`, `B: 2026-1-32`, `C: Error`, `D: 2026-02-01`
+     - **Answer: D (2026-02-01)**. `timedelta` arithmetic correctly rolls over the calendar month into February.
+

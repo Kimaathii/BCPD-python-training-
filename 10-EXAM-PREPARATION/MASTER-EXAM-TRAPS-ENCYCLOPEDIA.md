@@ -1206,6 +1206,84 @@ except Exception as e:
 
 ---
 
+### TRAP 16.7: `d.weekday()` vs. `d.isoweekday()` Off-By-One `[Course: D14-12]`
+```python
+# THE EXAM BAIT
+from datetime import date
+d = date(2026, 11, 13) # Friday
+print(d.weekday(), d.isoweekday())
+```
+- **Intuitive Guess:** `5 5` (Friday as the 5th day of the work week).
+- **Actual Reality:** `4 5`
+- **CPython Under the Hood:** 
+  - `d.weekday()` is 0-indexed: Monday = 0, Tuesday = 1, ..., Friday = 4, Sunday = 6.
+  - `d.isoweekday()` is 1-indexed (ISO 8601 standard): Monday = 1, Tuesday = 2, ..., Friday = 5, Sunday = 7.
+- **Antidote:** Remember that the ISO method starts at 1, while standard Python `weekday()` follows Python's zero-indexing convention.
+
+---
+
+### TRAP 16.8: Non-Existent `timedelta` Attributes (`.hours`, `.minutes`) `[Course: D14-12]`
+```python
+# THE EXAM BAIT
+from datetime import timedelta
+td = timedelta(hours=36)
+try:
+    print(td.hours)
+except AttributeError as e:
+    print(type(e).__name__)
+```
+- **Intuitive Guess:** Prints `36` (or `12`).
+- **Actual Reality:** `AttributeError`
+- **CPython Under the Hood:** A `timedelta` instance internally stores and exposes ONLY three attributes: `days`, `seconds`, and `microseconds`. It does NOT have `.hours`, `.minutes`, `.weeks`, or `.milliseconds` attributes! `td = timedelta(hours=36)` stores `td.days = 1` and `td.seconds = 43200`.
+- **Antidote:** Compute hours manually: `total_hours = td.total_seconds() / 3600`, or unpack days and seconds.
+
+---
+
+### TRAP 16.9: Leading Zeros in Date & Integer Literals `[Course: D14-12]`
+```python
+# THE EXAM BAIT
+from datetime import date
+# Code in a script:
+d = date(2026, 11, 09)
+```
+- **Intuitive Guess:** Constructs date object for November 9th.
+- **Actual Reality:** `SyntaxError: leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers`
+- **CPython Under the Hood:** In Python 3, numbers starting with `0` (e.g. `09`) are disallowed decimal literals. Only octal literals prefixed with `0o` are permitted.
+- **Antidote:** Never pass leading zeros in integer arguments: write `date(2026, 11, 9)`.
+
+---
+
+# Domain 17: NumPy, Scientific Computing & Packaging
+
+### TRAP 17.1: `np.arange` vs. `np.linspace` Endpoint Collision `[Course: D15-03]`
+```python
+# THE EXAM BAIT
+import numpy as np
+a = np.arange(0, 10, 2)
+b = np.linspace(0, 10, 5)
+print(a[-1], b[-1])
+```
+- **Intuitive Guess:** Both end at `8` (or both end at `10`).
+- **Actual Reality:** `8 10.0`
+- **CPython Under the Hood:** `np.arange(start, stop, step)` follows Python's standard `range()` semantics: the `stop` boundary is **strictly excluded** ($0, 2, 4, 6, 8$). Conversely, `np.linspace(start, stop, num)` generates evenly spaced samples where the `stop` boundary is **included by default** (`endpoint=True`: $0.0, 2.5, 5.0, 7.5, 10.0$).
+- **Antidote:** Never assume `arange` includes the upper bound, and never assume `linspace` excludes it.
+
+---
+
+### TRAP 17.2: `np.empty()` Dirty Memory Illusion `[Course: D15-03]`
+```python
+# THE EXAM BAIT
+import numpy as np
+arr = np.empty((2, 2))
+print(arr == 0.0)
+```
+- **Intuitive Guess:** `[[True, True], [True, True]]` (zeros like `zeros()`).
+- **Actual Reality:** Arbitrary boolean matrix (often all `False`).
+- **CPython Under the Hood:** `np.empty()` allocates raw heap memory without zeroing it out. It contains whatever arbitrary bits happened to reside in that RAM block.
+- **Antidote:** Use `np.zeros()` if zero initialization is required. Use `np.empty()` strictly when immediately overwriting every element.
+
+---
+
 # The 60-Second "Trap Radar" Quick Reference
 
 | Trap Pattern | Code Trigger | What You Think Happens | What Actually Happens | Why |
@@ -1256,3 +1334,8 @@ except Exception as e:
 | **Month vs Minute** | `%M` in strftime | Month | Minute (00-59) | Capital `%M` = minute, lowercase `%m` = month |
 | **Timedelta Seconds**| `timedelta(days=1, sec=5).seconds` | `86405` | `5` | `.seconds` is remainder mod 86400; use `.total_seconds()` |
 | **Regex Injection** | `re.search("1+1", text)` | Literal match | `False` or `re.error` | Metacharacters parsed as syntax; wrap in `re.escape()` |
+| **Weekday Indexing**| `d.weekday()` vs `d.isoweekday()` | `4 4` or `5 5` | `4 5` | `weekday` Monday=0; `isoweekday` Monday=1 |
+| **Timedelta Hours** | `timedelta(hours=36).hours` | `36` or `12` | `AttributeError` | `timedelta` has no `.hours` or `.minutes` attribute |
+| **Leading Zero Date**| `date(2026, 11, 09)` | November 9 | `SyntaxError` | Leading zero integer literals forbidden in Python 3 |
+| **Arange vs Linspace**| `arange(0,10,2)` vs `linspace(0,10,5)`| Both end at 8 or 10 | `8 10.0` | `arange` excludes stop; `linspace` includes stop |
+| **Empty Dirty Memory**| `np.empty((2, 2))` | All zeros | Garbage floats | Heap allocation without memory zeroing |
