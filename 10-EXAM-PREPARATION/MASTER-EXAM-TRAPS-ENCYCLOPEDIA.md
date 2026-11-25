@@ -1116,6 +1116,96 @@ c.radius = 10
 
 ---
 
+# Domain 16: Regular Expressions, DateTime & Custom Modules
+
+### TRAP 16.1: The Greedy Tag Swallowing Trap `[Course: D14-07]`
+```python
+# THE EXAM BAIT
+import re
+html = "<b>bold</b><i>it</i>"
+print(re.findall(r"<.+>", html))
+```
+- **Intuitive Guess:** `['<b>', '</b>', '<i>', '</i>']`
+- **Actual Reality:** `['<b>bold</b><i>it</i>']`
+- **CPython Under the Hood:** Quantifiers (`+`, `*`, `{n,m}`) are **greedy** by default. `.+` consumes as many characters as possible across the string until the final `>` in `</i>`, swallowing all intermediate tags into one giant match.
+- **Antidote:** Append a `?` after the quantifier to make it lazy: `re.findall(r"<.+?>", html)` or use a negated character class: `re.findall(r"<[^>]+>", html)`.
+
+---
+
+### TRAP 16.2: `re.findall()` Shape-Shift with Capturing Groups `[Course: D14-06]`
+```python
+# THE EXAM BAIT
+import re
+s = "cat 3, dog 12"
+res1 = re.findall(r"\w+ \d+", s)
+res2 = re.findall(r"(\w+) (\d+)", s)
+print(type(res1[0]), type(res2[0]))
+```
+- **Intuitive Guess:** `<class 'str'> <class 'str'>`
+- **Actual Reality:** `<class 'str'> <class 'tuple'>`
+- **CPython Under the Hood:** `re.findall()` dynamically alters its return structure based on whether capturing groups `()` are present. With 0 groups, it returns `list[str]`. With 2 or more groups, it returns `list[tuple[str, ...]]` containing the captured tokens: `[('cat', '3'), ('dog', '12')]`.
+- **Antidote:** Use non-capturing groups `(?:...)` if grouping is needed without altering the return type to tuples.
+
+---
+
+### TRAP 16.3: `re.match()` Zero-Index Lock `[Course: D14-02]`
+```python
+# THE EXAM BAIT
+import re
+print(re.match(r"\d+", "Order 66"))
+```
+- **Intuitive Guess:** `<re.Match object; span=(6, 8), match='66'>`
+- **Actual Reality:** `None`
+- **CPython Under the Hood:** `re.match()` is hard-anchored to character index 0 of the string. Because `"Order"` starts at index 0, the match fails immediately and returns `None`.
+- **Antidote:** Use `re.search()` to scan the entire string for the first match, or `re.findall()` to find all matches.
+
+---
+
+### TRAP 16.4: Date Format Specifier Collision (`%m` vs. `%M`) `[Course: D14-01]`
+```python
+# THE EXAM BAIT
+from datetime import datetime
+dt = datetime(2026, 11, 24, 14, 30, 0)
+print(dt.strftime("%Y-%M-%d"))
+```
+- **Intuitive Guess:** `"2026-11-24"`
+- **Actual Reality:** `"2026-30-24"`
+- **CPython Under the Hood:** `%M` represents **Minute** (00–59), not Month! Lowercase `%m` represents **month** (01–12).
+- **Antidote:** Associate lowercase `%m` with **m**onth and uppercase `%M` with **M**inute.
+
+---
+
+### TRAP 16.5: `timedelta.seconds` Attribute vs. `.total_seconds()` Method `[Course: D14-01]`
+```python
+# THE EXAM BAIT
+from datetime import timedelta
+td = timedelta(days=2, seconds=10)
+print(td.seconds, td.total_seconds())
+```
+- **Intuitive Guess:** `172810 172810.0`
+- **Actual Reality:** `10 172810.0`
+- **CPython Under the Hood:** A `timedelta` object normalizes days and sub-day seconds separately. The attribute `td.seconds` returns only the remainder within the day ($0 \le \text{seconds} < 86400$). The method `td.total_seconds()` computes the full mathematical duration across all days, seconds, and microseconds.
+- **Antidote:** Always call `td.total_seconds()` when calculating cumulative durations or timeouts.
+
+---
+
+### TRAP 16.6: Dynamic Regex Pattern Injection `[Course: D14-05]`
+```python
+# THE EXAM BAIT
+import re
+user_input = "1+1=2"
+try:
+    print(bool(re.search(user_input, "Math: 1+1=2")))
+except Exception as e:
+    print(type(e).__name__)
+```
+- **Intuitive Guess:** `True`
+- **Actual Reality:** `False` (or `re.error` if string has trailing `+` like `"formula+"`)
+- **CPython Under the Hood:** Raw metacharacters in user input (`+`, `*`, `?`, `[`, `(`, `.`) are interpreted by the regex compiler as grammar operators rather than string literals.
+- **Antidote:** Wrap dynamic or external user input in `re.escape(user_input)` before passing to regex functions.
+
+---
+
 # The 60-Second "Trap Radar" Quick Reference
 
 | Trap Pattern | Code Trigger | What You Think Happens | What Actually Happens | Why |
@@ -1160,3 +1250,9 @@ c.radius = 10
 | **Math Pow Float** | `math.pow(2, 3)` | `8` (`int`) | `8.0` (`float`) | `math.pow` always returns float |
 | **Randint Inclusive**| `random.randint(1, 3)` | 1 or 2 | 1, 2, or 3 | Both start and stop are inclusive |
 | **Shuffle Tuple** | `random.shuffle((1, 2))`| Shuffled tuple | `TypeError` | Shuffle mutates in-place; tuples are immutable |
+| **Greedy Tag** | `re.findall(r"<.+>", "<b>x</b>")` | `['<b>', '</b>']` | `['<b>x</b>']` | `.+` greedily consumes to final `>` |
+| **Findall Groups** | `re.findall(r"(\w+) (\d+)", s)` | `list[str]` | `list[tuple]` | Capturing groups transform elements to tuples |
+| **Match Zero Lock** | `re.match(r"\d+", "A1")` | Match on `'1'` | `None` | `re.match` requires match at index 0 |
+| **Month vs Minute** | `%M` in strftime | Month | Minute (00-59) | Capital `%M` = minute, lowercase `%m` = month |
+| **Timedelta Seconds**| `timedelta(days=1, sec=5).seconds` | `86405` | `5` | `.seconds` is remainder mod 86400; use `.total_seconds()` |
+| **Regex Injection** | `re.search("1+1", text)` | Literal match | `False` or `re.error` | Metacharacters parsed as syntax; wrap in `re.escape()` |
