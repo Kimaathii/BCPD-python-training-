@@ -603,6 +603,93 @@ print(a)
 
 ---
 
+### TRAP 9.3: Exception Hierarchy Masking (Subclass Shadowing) `[Course: IMG-45, Manual §8.2]`
+```python
+# THE EXAM BAIT
+try:
+    d = {"name": "Ada"}
+    print(d["age"])
+except LookupError:
+    print("Caught LookupError")
+except KeyError:
+    print("Caught KeyError")
+```
+- **Intuitive Guess:** Prints `"Caught KeyError"` because a dictionary key lookup failed.
+- **Actual Reality:** Prints `"Caught LookupError"`! The `except KeyError` block is completely bypassed and dead code!
+- **CPython Under the Hood:** CPython evaluates `except` clauses sequentially from top to bottom and executes the **first matching block** where `issubclass(raised_exc, target_exc)` is `True`. Because `KeyError` is a direct subclass of `LookupError` (`issubclass(KeyError, LookupError) == True`), the first block matches and executes. The more specific `KeyError` block will NEVER run.
+- **Exam Writer's Angle:** Extremely common question testing understanding of the standard exception hierarchy (`BaseException` $\rightarrow$ `Exception` $\rightarrow$ `LookupError` $\rightarrow$ `IndexError`, `KeyError`; `ArithmeticError` $\rightarrow$ `ZeroDivisionError`, `OverflowError`).
+- **Antidote:** Always arrange `except` blocks from **most specific (subclasses)** to **most generic (parent classes)**:
+  ```python
+  except KeyError:
+      ...
+  except LookupError:
+      ...
+  ```
+
+---
+
+### TRAP 9.4: File Mode `'w'` Immediate Truncation on Open `[Course: Manual §8.4]`
+```python
+# THE EXAM BAIT (file 'data.txt' currently contains 500 lines of data)
+with open("data.txt", "w") as f:
+    # Program encounters an error before writing anything:
+    1 / 0
+```
+- **Intuitive Guess:** Because division by zero aborted the script, the original 500 lines in `data.txt` remain safely preserved on disk.
+- **Actual Reality:** `data.txt` is completely wiped to **0 bytes**!
+- **CPython Under the Hood:** Opening a file in `'w'` mode (write) invokes the OS-level `O_TRUNC` flag immediately upon the `open()` call, zeroing out the file contents before Python executes a single line inside the `with` block!
+- **Exam Writer's Angle:** Tests whether candidate understands the immediate destructive nature of mode `'w'` versus `'r+'` or `'a'`.
+- **Antidote:** Use mode `'r+'` if you need to read and update, `'a'` to append, or `'x'` (exclusive create) to prevent accidentally overwriting an existing file.
+
+---
+
+### TRAP 9.5: Context Manager Exception Suppression (`__exit__` Returning `True`) `[Course: Manual §8.5]`
+```python
+# THE EXAM BAIT
+class SilenceErrors:
+    def __enter__(self):
+        return self
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return True  # Returns a truthy value!
+
+with SilenceErrors():
+    print("Step 1")
+    1 / 0
+    print("Step 2")
+
+print("Step 3")
+```
+- **Intuitive Guess:** Prints `"Step 1"`, then crashes with `ZeroDivisionError`.
+- **Actual Reality:** Prints `"Step 1"`, then prints `"Step 3"`! (No exception was raised to the caller!)
+- **CPython Under the Hood:** In Python's Context Manager protocol, when an exception occurs inside the `with` block, Python passes the exception details to `__exit__(exc_type, exc_val, exc_tb)`. If `__exit__` returns **`True`**, Python **swallows/suppresses** the exception and continues execution after the `with` statement as if no error occurred! If `__exit__` returns `False` or `None`, the exception propagates normally.
+- **Exam Writer's Angle:** Core question for senior/developer certifications testing the formal dunder protocol of context managers.
+- **Antidote:** Return `False` or `None` from `__exit__` unless intentional suppression of specific expected errors is explicitly desired.
+
+---
+
+### TRAP 9.6: Multiple Exception Types Require a Parenthesized Tuple (Not List or Unparenthesized `as`) `[Course: IMG-45]`
+```python
+# THE EXAM BAIT 1: Unparenthesized when capturing instance
+try:
+    int("abc")
+except ValueError, TypeError as e:  # SyntaxError!
+    print("Caught:", e)
+
+# THE EXAM BAIT 2: Using list or set instead of tuple
+try:
+    int("abc")
+except [ValueError, TypeError]:     # TypeError at runtime!
+    print("Caught error")
+```
+- **Intuitive Guess:** Both catch either `ValueError` or `TypeError`.
+- **Actual Reality:** 
+  1. `SyntaxError: multiple exception types must be parenthesized when using 'as'`.
+  2. `TypeError: catching classes that do not inherit from BaseException is not allowed`.
+- **CPython Under the Hood:** In Python 2, a comma after an exception type bound the exception to a variable name (`except Exception, err:`). Python 3 replaced this with the explicit `as` keyword (`except Exception as err:`). Consequently, trying to capture `as e` without enclosing the types in parentheses creates an ambiguous syntax error. Furthermore, Python's exception matching runtime strictly checks if the exception target is a `tuple` of classes; a `list` or `set` is not unpacked, causing CPython's `PyErr_GivenExceptionMatches` to reject it with a `TypeError`.
+- **Antidote:** Always wrap multiple exception classes strictly in a parenthesized tuple: `except (ValueError, TypeError) as e:`.
+
+---
+
 # Domain 10: Tuples, Records & Collections
 
 ### TRAP 10.1: The Single-Element Tuple Comma Omission `[Course: D8-03]`
@@ -1553,3 +1640,7 @@ print(grid.sum(axis=1))
 | **Module Name Guard**| `__name__` on import | `"__main__"` | `"module_name"` | `"__main__"` only when run as top-level script |
 | **NumPy View vs Copy**| `m[0:2]` vs `m[m > 2]` | Both copies/views | Slice is view, mask is copy | Slicing creates view; masking allocates new copy |
 | **NumPy Axis Collapse**| `grid.sum(axis=0)` | Row sums | Column sums | `axis=0` collapses rows to produce column totals |
+| **Exception Masking**| `LookupError` before `KeyError`| Catches `KeyError` | Catches `LookupError` | Parent exception block masks subclass blocks |
+| **File Mode 'w' Wipe**| `open('file', 'w')` with error| File preserved | File truncated to 0 bytes | `O_TRUNC` executes immediately upon open |
+| **Context Mgr Swallow**| `__exit__` returns `True` | Error crashes app | Error silently swallowed | Truthy `__exit__` suppresses current exception |
+| **Except Tuple Syntax**| `except E1, E2:` (no parens) | Catches both | `SyntaxError` | Python 3 requires parenthesized tuple `(E1, E2)` |

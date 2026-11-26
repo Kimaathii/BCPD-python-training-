@@ -129,9 +129,118 @@ BaseException
 
 ---
 
-## 4. Common Exam Traps & Gotchas Summary
+## 4. File I/O Operations & Stream Mechanics `[Course: IMG-45, IMG-76]`
 
-1. **`is` vs `==` on Integers / Floats:** Never use `is` to check numerical equality; caching boundaries make it non-deterministic across Python implementations.
-2. **`else` Block in Exceptions:** The `else` clause in a `try` statement only runs if the `try` block ran to completion **without** raising an exception.
-3. **`finally` Always Runs:** Even if a `try` or `except` block contains an explicit `return` statement, the `finally` block executes before the function exits.
-4. **Circular Imports:** Module A importing Module B while Module B imports Module A at the top level causes `ImportError: cannot import name ... from partially initialized module`.
+Python manages file streams via the built-in `open(file, mode='r', buffering=-1, encoding=None)` function.
+
+### File Access Modes Invariant Matrix
+| Mode | Meaning | Creates if Missing? | Truncates to 0? | Initial Cursor Position | Read/Write Ability |
+|:---:|:---|:---:|:---:|:---:|:---|
+| `'r'` | Read (default) | ❌ (Raises `FileNotFoundError`) | ❌ | Start (byte 0) | Read only |
+| `'w'` | Write | ✅ | ✅ (Destructive!) | Start (byte 0) | Write only |
+| `'a'` | Append | ✅ | ❌ | End of file | Write only (forces write to end) |
+| `'x'` | Exclusive Creation | ✅ (Raises `FileExistsError` if file exists) | ❌ | Start (byte 0) | Write only |
+| `'r+'` | Read + Write | ❌ (Raises `FileNotFoundError`) | ❌ | Start (byte 0) | Read and Write |
+| `'w+'` | Write + Read | ✅ | ✅ (Destructive!) | Start (byte 0) | Read and Write |
+| `'a+'` | Append + Read | ✅ | ❌ | End for writes, Start for initial read | Read and Append |
+| `'b'` | Binary Mode | (Suffix e.g. `'rb'`, `'wb'`) | - | - | Operates on `bytes`, not `str` |
+
+> [!CAUTION]
+> ### The Mode `'w'` Truncation Trap (Trap 9.4)
+> `open("data.txt", "w")` executes an underlying OS `O_TRUNC` system call immediately upon opening. Any previous file content is erased to 0 bytes instantly, even if the program crashes or raises an exception before any `write()` call executes!
+
+### Stream Cursor Navigation (`tell` & `seek`)
+Files behave as sequential byte streams tracked by an internal cursor:
+- `f.tell()`: Returns the current cursor position as an integer byte offset.
+- `f.seek(offset, whence=0)`:
+  - `whence=0` (`os.SEEK_SET`, default): Relative to the start of the file.
+  - `whence=1` (`os.SEEK_CUR`): Relative to the current cursor position (binary mode only in Python 3).
+  - `whence=2` (`os.SEEK_END`): Relative to the end of the file (e.g. `f.seek(0, 2)` jumps to end).
+
+### Stream Reading Best Practices
+1. **Never use `f.read()` on large files:** It loads the entire file into RAM at once, causing $O(N)$ memory bloat.
+2. **Use line-by-line streaming:** `for line in f:` iterates lazily with $O(1)$ memory consumption via Python's internal read-ahead buffer.
+3. **`f.readline()` vs `f.readlines()`:** `f.readline()` reads a single string ending in `\n`; `f.readlines()` reads all lines into a `list[str]`.
+
+---
+
+## 5. Context Managers & The Dunder Protocol `[Course: IMG-45]`
+
+Manual file handling requires `try...finally` to ensure `f.close()` executes:
+```python
+f = open("data.txt", "r")
+try:
+    data = f.read()
+finally:
+    f.close()
+```
+The `with` statement encapsulates this cleanup pattern cleanly through the **Context Management Protocol**.
+
+### The `__enter__` and `__exit__` Protocol
+Any class implementing `__enter__` and `__exit__` can be used in a `with` statement:
+
+```python
+class ManagedResource:
+    def __enter__(self):
+        # 1. Setup resource
+        print("Acquiring resource")
+        return self  # Bound to target after 'as'
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # 2. Teardown / cleanup actions
+        print("Releasing resource")
+        # Returning True SUPPRESSES the exception!
+        # Returning False (or None) allows the exception to propagate!
+        return False
+```
+
+### Exception Suppression Mechanics (Trap 9.5)
+- If an exception occurs inside the `with` block, Python passes its details to `__exit__(exc_type, exc_val, exc_tb)`.
+- If `__exit__` returns a truthy value (e.g. `True`), Python **swallows the exception**; execution continues normally after the `with` block.
+- If `__exit__` returns `False` or `None`, Python re-raises the exception up the call stack.
+
+---
+
+## 6. Advanced Exception Patterns & Subclass Masking `[Course: IMG-22, IMG-45]`
+
+### Subclass Shadowing / Exception Masking (Trap 9.3)
+Python tests `except` blocks sequentially from top to bottom using `issubclass()`. Catching a parent exception class before a child renders the child handler unreachable dead code:
+
+```python
+# BUG / EXAM TRAP:
+try:
+    d = {"name": "Alice"}
+    print(d["missing_key"])
+except LookupError:  # LookupError is the base class of KeyError & IndexError!
+    print("Caught LookupError")  # Executes!
+except KeyError:     # UNREACHABLE DEAD CODE!
+    print("Caught KeyError")
+```
+
+### Multi-Exception Tuple Syntax (Trap 9.6)
+When catching multiple exceptions in a single handler:
+```python
+# CORRECT:
+except (ValueError, TypeError) as err:
+    print("Caught:", err)
+
+# SYNTAX ERROR IN PYTHON 3 (when using 'as'):
+except ValueError, TypeError as err:  # SyntaxError!
+    ...
+
+# RUNTIME TYPE ERROR (cannot use list/set):
+except [ValueError, TypeError]:  # TypeError at runtime!
+    ...
+```
+
+---
+
+## 7. Common Exam Traps & Gotchas Summary
+
+1. **`is` vs `==` on Integers / Floats (Trap 1.19):** Never use `is` to check numerical equality; caching boundaries make it non-deterministic across Python implementations.
+2. **`else` Block in Exceptions (Trap 9.2):** The `else` clause in a `try` statement only runs if the `try` block ran to completion **without** raising an exception.
+3. **`finally` Always Runs (Trap 9.1):** Even if a `try` or `except` block contains an explicit `return` statement, the `finally` block executes before the function exits.
+4. **Exception Hierarchy Masking (Trap 9.3):** Placing parent classes (`LookupError`, `ArithmeticError`, `Exception`) ahead of child classes (`KeyError`, `ZeroDivisionError`) masks the children as dead code.
+5. **Mode `'w'` Immediate Truncation (Trap 9.4):** Opening an existing file in `'w'` mode truncates it to 0 bytes immediately at the C-level open call.
+6. **Context Manager Exception Suppression (Trap 9.5):** An `__exit__()` method returning `True` suppresses exceptions, while returning `False` or `None` propagates them.
+7. **Multiple Exception Parentheses (Trap 9.6):** Multiple exceptions must be specified as a parenthesized tuple `(E1, E2)`, not a list `[E1, E2]` or comma-separated with `as`.

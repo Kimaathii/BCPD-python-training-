@@ -108,6 +108,78 @@ class DailyLimitExceededError(BankingError):
 
 
 # ==============================================================================
+# Level 5: File I/O Stream & Cursor Inspector
+# ==============================================================================
+def inspect_file_stream(file_path: str) -> Dict[str, Any]:
+    """
+    Opens file_path in 'r' mode and performs cursor audit:
+    - Verifies initial cursor position (pos_start == 0)
+    - Reads line-by-line streaming without read() bloat:
+      - line_count: total lines read
+      - non_empty_lines: lines with content after strip()
+    - Jumps cursor to end (seek(0, 2)) to measure total_bytes via tell()
+    - Rewinds cursor back to start (seek(0))
+    - pos_end_after_rewind: tell() == 0
+    Returns dict with keys: 'line_count', 'non_empty_lines', 'total_bytes', 'rewound_to_start'.
+    """
+    with open(file_path, "r", encoding="utf-8") as f:
+        assert f.tell() == 0
+        line_count = 0
+        non_empty = 0
+        for line in f:
+            line_count += 1
+            if line.strip():
+                non_empty += 1
+        
+        # Determine file size using cursor seek to end
+        f.seek(0, 2)
+        total_bytes = f.tell()
+
+        # Rewind back to beginning
+        f.seek(0)
+        rewound = (f.tell() == 0)
+
+    return {
+        "line_count": line_count,
+        "non_empty_lines": non_empty,
+        "total_bytes": total_bytes,
+        "rewound_to_start": rewound,
+    }
+
+
+# ==============================================================================
+# Level 6: Context Manager Exception Shield
+# ==============================================================================
+class ContextExceptionShield:
+    """
+    Custom context manager that shields against specified exception types.
+    - __init__(suppressed_types=(Exception,), log_action=True)
+    - __enter__() logs 'ENTERED' to events list and returns self
+    - __exit__():
+      - logs 'EXITED' to events list
+      - if exc_type matches any type in suppressed_types:
+          - logs f'SUPPRESSED:{exc_type.__name__}' to events
+          - returns True (suppresses the exception)
+      - otherwise:
+          - returns False (allows unhandled exception to propagate)
+    """
+    def __init__(self, suppressed_types: Tuple[type, ...] = (Exception,)):
+        self.suppressed_types = suppressed_types
+        self.events: List[str] = []
+
+    def __enter__(self):
+        self.events.append("ENTERED")
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.events.append("EXITED")
+        if exc_type is not None and issubclass(exc_type, self.suppressed_types):
+            self.events.append(f"SUPPRESSED:{exc_type.__name__}")
+            return True
+        return False
+
+
+# ==============================================================================
 # Self-Verification Tests
 # ==============================================================================
 def test_exercises():
@@ -147,6 +219,38 @@ def test_exercises():
         assert isinstance(e, InsufficientFundsError)
         assert e.code == 1001
         assert e.balance == 50.0
+
+    # Test Level 5 (File I/O Stream)
+    import os
+    import tempfile
+    with tempfile.NamedTemporaryFile("w+", delete=False, encoding="utf-8") as tf:
+        tf.write("Header\n\nRow 1\nRow 2\n")
+        tf_name = tf.name
+
+    try:
+        stream_res = inspect_file_stream(tf_name)
+        assert stream_res["line_count"] == 4
+        assert stream_res["non_empty_lines"] == 3
+        assert stream_res["total_bytes"] > 0
+        assert stream_res["rewound_to_start"] is True
+    finally:
+        if os.path.exists(tf_name):
+            os.remove(tf_name)
+
+    # Test Level 6 (Context Manager Exception Shield)
+    with ContextExceptionShield(suppressed_types=(KeyError, ValueError)) as shield:
+        _ = {"a": 1}["missing"]  # KeyError
+    assert shield.events == ["ENTERED", "EXITED", "SUPPRESSED:KeyError"]
+
+    # Test Level 6 Unshielded propagation
+    unhandled_hit = False
+    try:
+        with ContextExceptionShield(suppressed_types=(ValueError,)) as shield_strict:
+            _ = 1 / 0  # ZeroDivisionError not in suppressed_types
+    except ZeroDivisionError:
+        unhandled_hit = True
+    assert unhandled_hit is True
+    assert shield_strict.events == ["ENTERED", "EXITED"]
 
 
 if __name__ == "__main__":

@@ -232,6 +232,67 @@ def test_domain_9_identity_and_exceptions():
         pass
     assert t == ([1, 3], 2)
 
+    # Trap 9.3: Exception hierarchy masking (subclass shadowing)
+    caught_name = ""
+    try:
+        d = {"a": 1}
+        _ = d["b"]
+    except LookupError:
+        caught_name = "LookupError"
+    except KeyError:
+        caught_name = "KeyError"
+    assert caught_name == "LookupError"
+
+    # Trap 9.4: File mode 'w' immediate truncation
+    import tempfile
+    with tempfile.NamedTemporaryFile("w+", delete=False) as tf:
+        tf.write("initial content")
+        tf_name = tf.name
+
+    try:
+        with open(tf_name, "w") as f_trunc:
+            pass
+        with open(tf_name, "r") as f_read:
+            assert f_read.read() == ""
+    finally:
+        import os
+        if os.path.exists(tf_name):
+            os.remove(tf_name)
+
+    # Trap 9.5: Context manager exception suppression
+    class SuppressException:
+        def __enter__(self):
+            return self
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            return True
+
+    suppressed = False
+    with SuppressException():
+        _ = 1 / 0
+        suppressed = False
+    suppressed = True
+    assert suppressed is True
+
+    # Trap 9.6: Multiple exception types require parenthesized tuple
+    # 1. SyntaxError when capturing 'as e' without parentheses
+    try:
+        compile("try: pass\nexcept ValueError, TypeError as e: pass", "<string>", "exec")
+        syn_err = False
+    except SyntaxError:
+        syn_err = True
+    assert syn_err is True
+
+    # 2. TypeError when passing list instead of tuple to except
+    caught_type_err = False
+    try:
+        try:
+            raise ValueError("test")
+        except [ValueError, TypeError]:
+            pass
+    except TypeError:
+        caught_type_err = True
+    assert caught_type_err is True
+
 
 def test_domain_10_tuples_and_collections():
     # Trap 10.1: Single item tuple comma
@@ -693,7 +754,7 @@ def main():
     test_domain_15_modules_sys_math_random()
     test_domain_16_regex_datetime_traps()
     test_domain_17_numpy_traps()
-    print("All 81+ Exam Traps rigorously verified and PASSED against CPython runtime.")
+    print("All 85+ Exam Traps rigorously verified and PASSED against CPython runtime.")
 
 
 if __name__ == "__main__":
