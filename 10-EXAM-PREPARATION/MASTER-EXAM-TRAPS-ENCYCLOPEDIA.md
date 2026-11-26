@@ -104,6 +104,25 @@ def verify():
 
 ---
 
+### TRAP 1.4: No Block Scoping (Loop & Conditional Variable Leakage) `[Course: IMG-41, D5-04]`
+```python
+# THE EXAM BAIT
+for i in range(5):
+    pass
+print(i)
+
+if True:
+    status = "authenticated"
+print(status)
+```
+- **Intuitive Guess:** `NameError: name 'i' is not defined` (like in JavaScript `let` or C++/Java block scope).
+- **Actual Reality:** Prints `4`, then prints `"authenticated"`.
+- **CPython Under the Hood:** In Python, only **functions**, **classes**, and **modules** create new variable scopes. Control flow constructs such as `for`, `while`, `if`, `elif`, `else`, `try`, and `except` do **NOT** create a new scope. Variables created or modified within these blocks leak directly into the enclosing function or module namespace.
+- **Exam Writer's Angle:** Directly targets candidates from JavaScript/C++/Java who assume block isolation.
+- **Antidote:** Do not rely on loop variables after the loop terminates; if temporary scoping is needed, encapsulate inside a function or helper closure.
+
+---
+
 # Domain 2: Types, Variables, Identity & Memory Model
 
 ### TRAP 2.1: Banker's Rounding (Round Half to Even) `[Course: IMG-10, IMG-30]`
@@ -143,6 +162,23 @@ print(a is b, c is d)
 - **Actual Reality:** `True False` (in interactive REPL / separate execution frames)
 - **CPython Under the Hood:** CPython pre-allocates an array of singleton integer objects for the range `[-5, 256]`. Any variable assigned an integer in this range references the exact same singleton object in memory (`a is b`). Outside this range, CPython may allocate distinct objects (`c is not d`).
 - **Antidote:** Use `is` **only** for testing identity against singletons (`None`, `True`, `False`). For values, always use `==`.
+
+---
+
+### TRAP 2.4: `int("2.5")` String Float Literal Conversion Failure `[Course: IMG-06, IMG-12]`
+```python
+# THE EXAM BAIT
+x = int(2.5)
+y = int("2.5")
+print(x, y)
+```
+- **Intuitive Guess:** `2 2` (both convert to integer 2).
+- **Actual Reality:** `ValueError: invalid literal for int() with base 10: '2.5'`
+- **CPython Under the Hood:** 
+  - `int(float_val)` performs truncation toward zero: `int(2.9) -> 2`.
+  - `int(string_val)` parses decimal string characters. Because `.` is not a valid base-10 digit character, `int("2.5")` immediately raises `ValueError`.
+- **Exam Writer's Angle:** Common question testing the difference between converting float instances vs string representations of floats.
+- **Antidote:** Parse string floats to `float` first, then convert: `int(float("2.5")) -> 2`.
 
 ---
 
@@ -304,6 +340,21 @@ print(sum(gen), sum(gen))
 
 ---
 
+### TRAP 5.4: Rebinding the Loop Variable Inside the Loop `[Course: IMG-41, IMG-44]`
+```python
+# THE EXAM BAIT
+for i in range(3):
+    i += 5
+    print(i, end=" ")
+```
+- **Intuitive Guess:** `5 11 17` (like in C/Java/JS where mutating loop counter `i` changes the next step).
+- **Actual Reality:** `5 6 7 `
+- **CPython Under the Hood:** Python's `for` loop is strictly an iterator consumer (`FOR_ITER` bytecode). At the beginning of each iteration pass, Python executes `i = next(iterator)`. Any manual assignment to `i` inside the body (`i += 5`) is completely overwritten by the next item produced by `range(3)` (which is `0`, then `1`, then `2`).
+- **Exam Writer's Angle:** Directly tricks developers with C, Java, or JavaScript backgrounds who expect counter mutations to change loop progression.
+- **Antidote:** Never mutate the loop target variable expecting it to change loop pacing; use a `while` loop if dynamic step advancement is required.
+
+---
+
 # Domain 6: Strings, Formatting & Text Processing
 
 ### TRAP 6.1: String Immutability Ignored `[Course: IMG-57, IMG-58, IMG-59/64]`
@@ -363,6 +414,25 @@ print(f"{{{42}}}")
 
 ---
 
+### TRAP 6.5: `str.split()` Whitespace Collapsing vs. `str.split(" ")` `[Course: IMG-60]`
+```python
+# THE EXAM BAIT
+s = "  a   b  "
+print(s.split())
+print(s.split(" "))
+```
+- **Intuitive Guess:** Both return `['a', 'b']`.
+- **Actual Reality:**
+  - `s.split()` returns `['a', 'b']`
+  - `s.split(" ")` returns `['', '', 'a', '', '', 'b', '', '']`
+- **CPython Under the Hood:**
+  - When called with **no arguments** (`s.split()`), Python treats any contiguous sequence of whitespace (spaces, tabs, newlines) as a single delimiter, and automatically strips leading and trailing whitespace.
+  - When called with an **explicit separator** (`s.split(" ")`), Python splits strictly on every individual occurrence of that exact character, resulting in empty string tokens `""` for consecutive delimiters and boundary whitespace.
+- **Exam Writer's Angle:** Extremely common question testing string tokenization nuances between Python and other languages.
+- **Antidote:** Always use `s.split()` without arguments to extract whitespace-delimited words.
+
+---
+
 # Domain 7: Lists, Sequences, Sorting & 2D Arrays
 
 ### TRAP 7.1: Overwriting List with In-Place Sort `[Course: IMG-61, IMG-71, D5-REV-01]`
@@ -412,6 +482,24 @@ print(sorted(fruits))
 - **Actual Reality:** `['Pear', 'apple', 'banana']`
 - **CPython Under the Hood:** Python sorts strings by Unicode / ASCII numerical code points (`ord()`). Uppercase letters (`'A'`–`'Z'`: 65–90) precede lowercase letters (`'a'`–`'z'`: 97–122). Because `'P'` is 80 and `'a'` is 97, `"Pear"` sorts before `"apple"`.
 - **Antidote:** For case-insensitive sorting, pass the lowercase key: `sorted(fruits, key=str.lower)`.
+
+---
+
+### TRAP 7.4: `list.remove()` Deletes Only First Occurrence & Raises `ValueError` `[Course: IMG-61, D5-REV-01]`
+```python
+# THE EXAM BAIT
+items = [1, 2, 2, 3]
+items.remove(2)
+print(items)
+items.remove(5)
+```
+- **Intuitive Guess:** `[1, 3]` (all `2`s removed), and `items.remove(5)` returns `False` or is ignored.
+- **Actual Reality:** Prints `[1, 2, 3]`; then line 5 raises `ValueError: list.remove(x): x not in list`.
+- **CPython Under the Hood:**
+  - `list.remove(value)` searches from left to right and removes **only the first matching element found**. It does not perform a global sweep.
+  - If `value` does not exist in the list, it raises `ValueError` immediately.
+- **Exam Writer's Angle:** Tests whether candidates understand single-item mutation vs global filtering, and error handling on absent elements.
+- **Antidote:** To remove all occurrences safely, use list comprehension: `items = [x for x in items if x != 2]`. To remove safely without exceptions, guard with `if x in items: items.remove(x)`.
 
 ---
 
@@ -637,6 +725,24 @@ print(all(set()), any(set()))
   - `all(iterable)` returns `True` if no element in the iterable is false. Because an empty set contains no elements, no false elements exist—this is **vacuous truth**!
   - `any(iterable)` returns `True` if at least one element is true. Since the set is empty, it returns `False`.
 - **Antidote:** Check `bool(s) and all(s)` if you need the set to be non-empty.
+
+---
+
+### TRAP 11.6: `set.remove()` vs. `set.discard()` on Missing Elements `[Course: D8-14]`
+```python
+# THE EXAM BAIT
+s = {1, 2}
+s.discard(3)
+print("Discard succeeded")
+s.remove(3)
+```
+- **Intuitive Guess:** Both methods remove the element or do nothing if not found.
+- **Actual Reality:** Prints `"Discard succeeded"`; then line 5 raises `KeyError: 3`.
+- **CPython Under the Hood:**
+  - `set.discard(elem)` removes `elem` if present; if absent, it silently returns `None` without raising an error.
+  - `set.remove(elem)` strictly requires `elem` to exist in the set. If absent, it raises `KeyError`.
+- **Exam Writer's Angle:** Classic multiple-choice question designed to test method boundary conditions on missing keys.
+- **Antidote:** Use `.discard()` when the presence of the element is optional; use `.remove()` only when missing elements represent exceptional state.
 
 ---
 
@@ -1253,6 +1359,56 @@ d = date(2026, 11, 09)
 
 ---
 
+### TRAP 16.10: Capturing Parentheses in `re.split()` Retain Delimiters `[Course: D14-08]`
+```python
+# THE EXAM BAIT
+import re
+print(re.split(r",", "a,b,c"))
+print(re.split(r"(,)", "a,b,c"))
+```
+- **Intuitive Guess:** Both return `['a', 'b', 'c']`.
+- **Actual Reality:** 
+  - First prints `['a', 'b', 'c']`
+  - Second prints `['a', ',', 'b', ',', 'c']` (delimiters are kept!)
+- **CPython Under the Hood:** When capturing groups `(...)` are included in the `re.split()` pattern, the separator tokens themselves are captured and spliced directly into the returned output list.
+- **Exam Writer's Angle:** Directly tests candidates on regex tokenizer implementation nuances.
+- **Antidote:** Use non-capturing groups `(?:...)` if grouping is needed without retaining separators in the split result.
+
+---
+
+### TRAP 16.11: `re.subn()` Returns a 2-Tuple `(new_string, count)` `[Course: D14-08]`
+```python
+# THE EXAM BAIT
+import re
+res = re.subn(r"\d", "#", "a1b22")
+print(type(res).__name__, res)
+```
+- **Intuitive Guess:** `<class 'str'> a#b##` (same as `re.sub`).
+- **Actual Reality:** `<class 'tuple'> ('a#b##', 3)`
+- **CPython Under the Hood:** `re.subn()` performs substitutions identically to `re.sub()`, but returns a 2-tuple containing both the transformed string and an integer tally of total substitutions performed.
+- **Exam Writer's Angle:** Tests whether candidate knows which regex method returns a scalar string vs a metadata tuple.
+- **Antidote:** Use `re.sub()` if only the resulting string is needed; use `re.subn()` when substitution counts must be tracked.
+
+---
+
+### TRAP 16.12: `__name__` Identity Shift (`"__main__"` vs Module Name) `[Course: D14-13]`
+```python
+# THE EXAM BAIT (inside geometry.py)
+print(__name__)
+
+# Execution 1: python geometry.py
+# Execution 2: python -c "import geometry"
+```
+- **Intuitive Guess:** Both print `"geometry"` (or both print `"__main__"`).
+- **Actual Reality:**
+  - Execution 1 prints `"__main__"`
+  - Execution 2 prints `"geometry"`
+- **CPython Under the Hood:** When a file is invoked as the top-level entry point, CPython assigns `"__main__"` to its `__name__` global attribute. When loaded as an imported module, `__name__` is set to the file's stem name (`"geometry"`).
+- **Exam Writer's Angle:** Core syllabus test on module design, unit testing, and `if __name__ == "__main__":` guard behavior.
+- **Antidote:** Always enclose executable scripts, CLI parsers, and self-tests within `if __name__ == "__main__":`.
+
+---
+
 # Domain 17: NumPy, Scientific Computing & Packaging
 
 ### TRAP 17.1: `np.arange` vs. `np.linspace` Endpoint Collision `[Course: D15-03]`
@@ -1281,6 +1437,53 @@ print(arr == 0.0)
 - **Actual Reality:** Arbitrary boolean matrix (often all `False`).
 - **CPython Under the Hood:** `np.empty()` allocates raw heap memory without zeroing it out. It contains whatever arbitrary bits happened to reside in that RAM block.
 - **Antidote:** Use `np.zeros()` if zero initialization is required. Use `np.empty()` strictly when immediately overwriting every element.
+
+---
+
+### TRAP 17.3: NumPy Slicing (View) vs. Boolean Masking (Copy) `[Course: D15-01, D15-02]`
+```python
+# THE EXAM BAIT
+import numpy as np
+m = np.array([10, 20, 30, 40])
+slice_view = m[0:2]
+slice_view[0] = 999
+
+mask_copy = m[m > 100]
+mask_copy[0] = -1
+
+print(m)
+```
+- **Intuitive Guess:** Either both mutations modify `m` or neither does.
+- **Actual Reality:** `[999, 20, 30, 40]`
+- **CPython Under the Hood:**
+  - Standard slicing (`m[start:stop]`) creates a **view** referencing the identical memory buffer. Mutating elements in the view directly mutates the parent array.
+  - Boolean indexing (`m[m > 100]`) and fancy indexing with integer lists create an **independent memory copy**. Mutating the copy leaves the original array `m` untouched.
+- **Exam Writer's Angle:** Crucial memory management distinction frequently tested in data science and numerical Python exams.
+- **Antidote:** If you need an independent slice that won't mutate the parent, call `.copy()` explicitly: `sub = m[0:2].copy()`.
+
+---
+
+### TRAP 17.4: The NumPy Reduction Axis Collapse Illusion (`axis=0` vs. `axis=1`) `[Course: D15-02]`
+```python
+# THE EXAM BAIT
+import numpy as np
+grid = np.array([
+    [1, 2, 3],
+    [4, 5, 6]
+])
+print(grid.sum(axis=0))
+print(grid.sum(axis=1))
+```
+- **Intuitive Guess:**
+  - `axis=0` means rows, so it sums each row $\rightarrow$ `[6, 15]`
+  - `axis=1` means columns, so it sums each column $\rightarrow$ `[5, 7, 9]`
+- **Actual Reality:**
+  - `grid.sum(axis=0)` returns `[5, 7, 9]` (column sums!)
+  - `grid.sum(axis=1)` returns `[6, 15]` (row sums!)
+- **CPython Under the Hood:** The `axis` parameter specifies **which axis is collapsed/eliminated** during the reduction:
+  - Collapsing `axis=0` (the row dimension of size 2) reduces the 2 rows down to 1 row of 3 elements (the sum down each column: $1+4=5, 2+5=7, 3+6=9$).
+  - Collapsing `axis=1` (the column dimension of size 3) reduces the 3 columns down to 2 row sums ($1+2+3=6, 4+5+6=15$).
+- **Antidote:** Remember: *`axis=0` collapses rows to give column sums; `axis=1` collapses columns to give row sums.*
 
 ---
 
@@ -1339,3 +1542,14 @@ print(arr == 0.0)
 | **Leading Zero Date**| `date(2026, 11, 09)` | November 9 | `SyntaxError` | Leading zero integer literals forbidden in Python 3 |
 | **Arange vs Linspace**| `arange(0,10,2)` vs `linspace(0,10,5)`| Both end at 8 or 10 | `8 10.0` | `arange` excludes stop; `linspace` includes stop |
 | **Empty Dirty Memory**| `np.empty((2, 2))` | All zeros | Garbage floats | Heap allocation without memory zeroing |
+| **No Block Scope**   | `for i in range(3): pass; print(i)` | `NameError` | `2` | Control flow constructs do not create scopes |
+| **Int String Float** | `int("2.5")` | `2` | `ValueError` | `int()` expects valid integer digits in string |
+| **Loop Rebind Reset**| `for i in range(3): i += 5` | `5 11 17` | `5 6 7` | Loop target is rebound by iterator each pass |
+| **Split Collapsing** | `" a  b ".split(" ")` | `['a', 'b']` | `['', 'a', '', 'b', '']` | Explicit delimiter preserves empty tokens |
+| **List Remove First**| `[1, 2, 2].remove(2)` | `[1]` | `[1, 2]` | `.remove()` deletes only the first occurrence |
+| **Set Discard/Remove**| `set().remove(x)` | Silent no-op | `KeyError` | `.discard()` is safe; `.remove()` raises error |
+| **Split Capturing**  | `re.split(r"(,)", "a,b")` | `['a', 'b']` | `['a', ',', 'b']` | Capturing group keeps delimiter tokens |
+| **Subn Tuple Return**| `re.subn(r"\d", "#", "a1")` | `str` `"a#"` | `('a#', 1)` tuple | `.subn()` returns `(new_string, count)` |
+| **Module Name Guard**| `__name__` on import | `"__main__"` | `"module_name"` | `"__main__"` only when run as top-level script |
+| **NumPy View vs Copy**| `m[0:2]` vs `m[m > 2]` | Both copies/views | Slice is view, mask is copy | Slicing creates view; masking allocates new copy |
+| **NumPy Axis Collapse**| `grid.sum(axis=0)` | Row sums | Column sums | `axis=0` collapses rows to produce column totals |

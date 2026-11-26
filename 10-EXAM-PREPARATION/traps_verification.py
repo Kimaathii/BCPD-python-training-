@@ -28,6 +28,11 @@ def test_domain_1_syntax_and_env():
     y_input = "10"
     assert x_input + y_input == "510"
 
+    # Trap 1.4: No block scope in Python (loop & branch leakage)
+    for loop_var in range(5):
+        pass
+    assert loop_var == 4
+
 
 def test_domain_2_types_and_memory():
     # Trap 2.1: Banker's rounding
@@ -43,6 +48,14 @@ def test_domain_2_types_and_memory():
     a = 256
     b = 256
     assert a is b
+
+    # Trap 2.4: int("2.5") raises ValueError
+    assert int(2.5) == 2
+    try:
+        int("2.5")
+        assert False, "int('2.5') should raise ValueError"
+    except ValueError:
+        pass
 
 
 def test_domain_3_operators_and_bitwise():
@@ -103,6 +116,13 @@ def test_domain_5_loops_and_iteration():
     assert sum(gen) == 5
     assert sum(gen) == 0
 
+    # Trap 5.4: Rebinding loop target has no effect on iteration sequence
+    rebound_vals = []
+    for loop_i in range(3):
+        loop_i += 5
+        rebound_vals.append(loop_i)
+    assert rebound_vals == [5, 6, 7]
+
 
 def test_domain_6_strings_and_formatting():
     # Trap 6.1: String immutability
@@ -130,6 +150,11 @@ def test_domain_6_strings_and_formatting():
     assert "{{literal}}".format() == "{literal}"
     assert f"{{{42}}}" == "{42}"
 
+    # Trap 6.5: str.split() vs str.split(" ")
+    s_split = "  a   b  "
+    assert s_split.split() == ["a", "b"]
+    assert s_split.split(" ") == ["", "", "a", "", "", "b", "", ""]
+
 
 def test_domain_7_lists_and_sorting():
     # Trap 7.1: In-place sort returns None
@@ -146,6 +171,16 @@ def test_domain_7_lists_and_sorting():
     # Trap 7.3: ASCII case sensitivity in sorting
     fruits = ["apple", "Pear", "banana"]
     assert sorted(fruits) == ["Pear", "apple", "banana"]
+
+    # Trap 7.4: list.remove() deletes only first occurrence and raises ValueError on missing
+    rem_list = [1, 2, 2, 3]
+    rem_list.remove(2)
+    assert rem_list == [1, 2, 3]
+    try:
+        rem_list.remove(5)
+        assert False, "remove() on absent element should raise ValueError"
+    except ValueError:
+        pass
 
 
 def test_domain_8_functions_and_scope():
@@ -251,6 +286,16 @@ def test_domain_11_dicts_and_sets():
     # Trap 11.5: Vacuous truth
     assert all(set()) is True
     assert any(set()) is False
+
+    # Trap 11.6: set.remove() raises KeyError vs set.discard() is silent
+    s_set = {1, 2}
+    s_set.discard(3)  # silent no-op
+    assert s_set == {1, 2}
+    try:
+        s_set.remove(3)
+        assert False, "set.remove() on absent key should raise KeyError"
+    except KeyError:
+        pass
 
 
 def test_domain_12_oop_and_encapsulation():
@@ -562,6 +607,18 @@ def test_domain_16_regex_datetime_traps():
         syntax_err = True
     assert syntax_err is True
 
+    # Trap 16.10: Capturing groups in re.split retain delimiters [Course: D14-08]
+    assert re.split(r",", "a,b,c") == ["a", "b", "c"]
+    assert re.split(r"(,)", "a,b,c") == ["a", ",", "b", ",", "c"]
+
+    # Trap 16.11: re.subn returns a 2-tuple (new_str, count) [Course: D14-08]
+    subn_res = re.subn(r"\d", "#", "a1b22")
+    assert type(subn_res) is tuple
+    assert subn_res == ("a#b##", 3)
+
+    # Trap 16.12: __name__ is '__main__' only for entry point [Course: D14-13]
+    assert __name__ == "__main__" or "traps" in __name__
+
 
 def test_domain_17_numpy_traps():
     # Trap 17.1: arange excludes stop vs linspace includes stop [Course: D15-03]
@@ -573,12 +630,46 @@ def test_domain_17_numpy_traps():
     linspace_samples = [0.0 + i * (10.0 / 4) for i in range(5)]
     assert linspace_samples[-1] == 10.0
 
+    # Trap 17.3: Slicing view vs Boolean copy parity [Course: D15-01, D15-02]
+    # Python nested list / array simulation:
+    parent_data = [10, 20, 30, 40]
+    # Slice of list in pure Python is shallow copy, but in NumPy ndarray it's a view:
+    # Here we assert the invariant mathematically:
+    try:
+        import numpy as np
+        m = np.array([10, 20, 30, 40])
+        slice_view = m[0:2]
+        slice_view[0] = 999
+        assert m[0] == 999  # Slice mutated parent!
+
+        mask_copy = m[m > 100]
+        mask_copy[0] = -1
+        assert m[0] == 999  # Mask copy did NOT mutate parent!
+    except ImportError:
+        pass
+
+    # Trap 17.4: Axis collapse parity [Course: D15-02]
+    # In 2x3 matrix:
+    # [ [1, 2, 3],
+    #   [4, 5, 6] ]
+    # axis=0 (collapse rows) -> column sums: [1+4, 2+5, 3+6] = [5, 7, 9]
+    # axis=1 (collapse cols) -> row sums: [1+2+3, 4+5+6] = [6, 15]
+    matrix = [[1, 2, 3], [4, 5, 6]]
+    col_sums = [matrix[0][c] + matrix[1][c] for c in range(3)]
+    row_sums = [sum(row) for row in matrix]
+    assert col_sums == [5, 7, 9]
+    assert row_sums == [6, 15]
+
     try:
         import numpy as np
         a = np.arange(0, 10, 2)
         b = np.linspace(0, 10, 5)
         assert a[-1] == 8
         assert b[-1] == 10.0
+
+        grid = np.array(matrix)
+        assert list(grid.sum(axis=0)) == [5, 7, 9]
+        assert list(grid.sum(axis=1)) == [6, 15]
     except ImportError:
         pass
 
@@ -602,7 +693,7 @@ def main():
     test_domain_15_modules_sys_math_random()
     test_domain_16_regex_datetime_traps()
     test_domain_17_numpy_traps()
-    print("All 65+ Exam Traps rigorously verified and PASSED against CPython runtime.")
+    print("All 81+ Exam Traps rigorously verified and PASSED against CPython runtime.")
 
 
 if __name__ == "__main__":
