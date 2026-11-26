@@ -50,13 +50,15 @@ def main():
     examples = sorted(root_dir.glob("*/examples.py"))
     exercises = sorted(root_dir.glob("*/exercises.py"))
     traps = [root_dir / "10-EXAM-PREPARATION" / "traps_verification.py"]
+    functional_tests = [root_dir / "10-EXAM-PREPARATION" / "functional_mastery.py"]
     solutions = sorted((root_dir / "10-EXAM-PREPARATION" / "solutions").glob("*.py"))
-    test_files = examples + exercises + traps + solutions
+    test_files = examples + exercises + traps + functional_tests + solutions
 
     print(f"\nDiscovered {len(test_files)} executable suites:")
     print(f"  - {len(examples)} module example suites")
     print(f"  - {len(exercises)} module exercise suites")
     print(f"  - {len(traps)} master exam traps verification suite")
+    print(f"  - {len(functional_tests)} functional programming mastery suite")
     print(f"  - {len(solutions)} exercise solution suites\n")
 
     passed = 0
