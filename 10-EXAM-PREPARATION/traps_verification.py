@@ -293,6 +293,28 @@ def test_domain_9_identity_and_exceptions():
         caught_type_err = True
     assert caught_type_err is True
 
+    # Trap 9.7: assert (cond, msg) tuple is always truthy (Never raises!)
+    x = -500
+    # Using exec to test the dynamic tuple assertion without static compiler warning
+    exec("assert (x > 0, 'must be positive')")  # Passes silently!
+
+    # Bare comma assertion raises AssertionError as expected
+    try:
+        exec("assert x > 0, 'must be positive'")
+        assert False
+    except AssertionError as ae:
+        assert str(ae) == "must be positive"
+
+    # Trap 9.8: raise ... from None suppresses context
+    try:
+        try:
+            _ = 1 / 0
+        except ZeroDivisionError:
+            raise ValueError("custom") from None
+    except ValueError as ex:
+        assert ex.__cause__ is None
+        assert ex.__suppress_context__ is True
+
 
 def test_domain_10_tuples_and_collections():
     # Trap 10.1: Single item tuple comma
@@ -754,7 +776,7 @@ def main():
     test_domain_15_modules_sys_math_random()
     test_domain_16_regex_datetime_traps()
     test_domain_17_numpy_traps()
-    print("All 85+ Exam Traps rigorously verified and PASSED against CPython runtime.")
+    print("All 87+ Exam Traps rigorously verified and PASSED against CPython runtime.")
 
 
 if __name__ == "__main__":

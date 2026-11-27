@@ -690,6 +690,39 @@ except [ValueError, TypeError]:     # TypeError at runtime!
 
 ---
 
+### TRAP 9.7: The `assert` Tuple Trap (Always Truthy) `[Course: Day 16, Manual §21.9]`
+```python
+# THE EXAM BAIT
+x = -500
+assert (x > 0, "x must be positive")
+print("Check passed!")
+```
+- **Intuitive Guess:** `AssertionError: x must be positive` is raised because `-500 > 0` is `False`.
+- **Actual Reality:** Prints `"Check passed!"`. No exception is raised at all!
+- **CPython Under the Hood:** In Python, parentheses around comma-separated expressions construct a `tuple`. The expression `(x > 0, "x must be positive")` evaluates to `(False, "x must be positive")`. In Python's boolean truthiness evaluation, **any non-empty tuple evaluates to `True`** regardless of its elements! Therefore, `assert (anything, "msg")` always asserts a truthy condition and never triggers an `AssertionError`.
+- **Antidote:** Never wrap `assert` arguments in parentheses! Write bare comma: `assert x > 0, "x must be positive"`.
+
+---
+
+### TRAP 9.8: Exception Chaining Context Suppression with `from None` `[Course: Day 16, Manual §21.7–21.8]`
+```python
+# THE EXAM BAIT
+try:
+    try:
+        1 / 0
+    except ZeroDivisionError:
+        raise ValueError("Calculation failed") from None
+except ValueError as err:
+    print(err.__cause__)
+    print(err.__suppress_context__)
+```
+- **Intuitive Guess:** `err.__cause__` is `ZeroDivisionError`, and `__suppress_context__` is `False`.
+- **Actual Reality:** Prints `None` followed by `True`.
+- **CPython Under the Hood:** When an exception is raised inside an `except` block, Python normally attaches the original active exception to `err.__context__`. Using `from e` explicitly sets `err.__cause__ = e`. However, using `from None` explicitly sets `err.__cause__ = None` and sets `err.__suppress_context__ = True`, instructing CPython's traceback renderer to hide the original context traceback completely.
+- **Antidote:** Remember: `from e` exposes `__cause__`; `from None` suppresses context (`__cause__ is None` and `__suppress_context__ is True`).
+
+---
+
 # Domain 10: Tuples, Records & Collections
 
 ### TRAP 10.1: The Single-Element Tuple Comma Omission `[Course: D8-03]`
